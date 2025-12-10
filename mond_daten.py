@@ -13,7 +13,7 @@ EREIGNISSE_DB = [
     {
         "name": "Larrieus Staudamm", 
         "colong": 343.0, 
-        "duration_min": 180,
+        "duration_min": 120,
         "desc": "Kleine, beleuchtete Erhebung im Krater Polybius K, die wie eine Staumauer wirkt (kurz vor Erstes Viertel).",
         "phase": "Zunehmend",
         "lat": -24.5, "lon": 25.5
