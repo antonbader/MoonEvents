@@ -11,6 +11,7 @@ import mond_daten
 import mond_storage
 import mond_berechnung
 import mond_pdf
+import mond_map
 
 class MondApp(tk.Tk):
     def __init__(self):
@@ -51,6 +52,10 @@ class MondApp(tk.Tk):
         self.tab_calc = ttk.Frame(self.notebook)
         self.notebook.add(self.tab_calc, text="Berechnung")
         self.setup_calc_tab()
+
+        self.tab_map = ttk.Frame(self.notebook)
+        self.notebook.add(self.tab_map, text="Karte")
+        self.setup_map_tab()
         
         self.tab_info = ttk.Frame(self.notebook)
         self.notebook.add(self.tab_info, text="Info")
@@ -59,6 +64,28 @@ class MondApp(tk.Tk):
     def on_closing(self):
         mond_storage.save_data(self.app_data)
         self.destroy()
+
+    # --- TAB KARTE ---
+    def setup_map_tab(self):
+        self.map_widget = mond_map.MoonMap(self.tab_map)
+        self.map_widget.pack(fill='both', expand=True)
+        # Load initial selection
+        self.update_map_selection()
+
+        # Bind tab change to refresh map if needed (optional, but good practice)
+        self.notebook.bind('<<NotebookTabChanged>>', self.on_tab_changed)
+
+    def on_tab_changed(self, event):
+        # Check if Map tab is selected
+        selected_tab = event.widget.select()
+        tab_text = event.widget.tab(selected_tab, "text")
+        if tab_text == "Karte":
+            self.update_map_selection()
+
+    def update_map_selection(self):
+        sel_indices = self.app_data.get('selected_events_indices', [])
+        selected_events = [self.events_db[i] for i in sel_indices if i < len(self.events_db)]
+        self.map_widget.update_events(selected_events)
 
     # --- TAB INFO ---
     def setup_info_tab(self):
@@ -174,6 +201,9 @@ class MondApp(tk.Tk):
     def save_event_selection(self):
         self.app_data['selected_events_indices'] = [i for i, var in enumerate(self.event_vars) if var.get()]
         mond_storage.save_data(self.app_data)
+        # Update map if it exists
+        if hasattr(self, 'map_widget'):
+            self.update_map_selection()
 
     def select_all_events(self):
         for var in self.event_vars:
