@@ -194,8 +194,18 @@ class MondApp(tk.Tk):
         sel_indices = self.app_data.get('selected_events_indices', [])
         for i, event in enumerate(self.events_db):
             var = tk.BooleanVar(value=(i in sel_indices))
-            chk = ttk.Checkbutton(scroll_frame, text=event['name'], variable=var, command=self.save_event_selection)
-            chk.pack(anchor='w', padx=20, pady=2)
+
+            # Mondalter berechnen und Text anpassen
+            moon_age = mond_berechnung.calculate_moon_age_approx(event.get('colong', 0))
+            display_text = f"{event['name']} (Tag {moon_age:.1f})"
+
+            chk = ttk.Checkbutton(scroll_frame, text=display_text, variable=var, command=self.save_event_selection)
+
+            # Grid-Layout: 2 Spalten
+            row = i // 2
+            col = i % 2
+            chk.grid(row=row, column=col, sticky='w', padx=20, pady=2)
+
             self.event_vars.append(var)
     def save_event_selection(self):
         self.app_data['selected_events_indices'] = [i for i, var in enumerate(self.event_vars) if var.get()]
