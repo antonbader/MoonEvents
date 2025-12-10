@@ -142,19 +142,18 @@ def calculate_all_events(start_datetime_utc, end_datetime_utc, selected_events, 
             vis_end, _, _, _ = get_observability(end_utc, location_data)
             vis_peak_final, _, _, _ = get_observability(final_peak_utc, location_data)
             
-            # Status Text
-            if is_optimized:
-                theo_local = theo_peak_utc + timedelta(hours=offset)
-                theo_str = theo_local.strftime('%H:%M')
-                final_status = f"Verschoben (Theo: {theo_str}, Alt: {final_alt:.1f}°)"
-            elif not vis_peak_final:
-                final_status = reason_peak
-
             # Lokalzeiten
             peak_local = final_peak_utc + timedelta(hours=offset)
             start_local = start_utc + timedelta(hours=offset)
             end_local = end_utc + timedelta(hours=offset)
-            
+            theo_peak_local = theo_peak_utc + timedelta(hours=offset)
+
+            # Status Text
+            if is_optimized:
+                final_status = f"Verschoben ({reason_peak})"
+            elif not vis_peak_final:
+                final_status = reason_peak
+
             any_visible = vis_start or vis_peak_final or vis_end
 
             results.append({
@@ -163,6 +162,9 @@ def calculate_all_events(start_datetime_utc, end_datetime_utc, selected_events, 
                 "peak_local": peak_local,
                 "start_local": start_local,
                 "end_local": end_local,
+                "theo_peak_utc": theo_peak_utc,
+                "theo_peak_local": theo_peak_local,
+                "vis_peak_theo": vis_peak_theo,
                 "location": location_data['name'],
                 "vis_start": vis_start,
                 "vis_peak": vis_peak_final,
