@@ -31,15 +31,7 @@ Die Anwendung benötigt **Python 3.x**.
     cd moonevents
     ```
 
-2.  **Virtuelle Umgebung erstellen (empfohlen):**
-    ```bash
-    python3 -m venv venv
-    source venv/bin/activate  # Linux/Mac
-    # oder
-    venv\Scripts\activate     # Windows
-    ```
-
-3.  **Abhängigkeiten installieren:**
+2.  **Abhängigkeiten installieren:**
     ```bash
     pip install -r requirements.txt
     ```
