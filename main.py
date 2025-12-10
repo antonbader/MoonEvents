@@ -150,6 +150,12 @@ class MondApp(tk.Tk):
     def setup_events_tab(self):
         lbl = ttk.Label(self.tab_events, text="Ereignisse auswählen:")
         lbl.pack(pady=5)
+
+        btn_frame = ttk.Frame(self.tab_events)
+        btn_frame.pack(pady=(0, 5))
+        ttk.Button(btn_frame, text="Alle auswählen", command=self.select_all_events).pack(side='left', padx=5)
+        ttk.Button(btn_frame, text="Alle abwählen", command=self.deselect_all_events).pack(side='left', padx=5)
+
         canvas = tk.Canvas(self.tab_events)
         scrollbar = ttk.Scrollbar(self.tab_events, orient="vertical", command=canvas.yview)
         scroll_frame = ttk.Frame(canvas)
@@ -168,6 +174,16 @@ class MondApp(tk.Tk):
     def save_event_selection(self):
         self.app_data['selected_events_indices'] = [i for i, var in enumerate(self.event_vars) if var.get()]
         mond_storage.save_data(self.app_data)
+
+    def select_all_events(self):
+        for var in self.event_vars:
+            var.set(True)
+        self.save_event_selection()
+
+    def deselect_all_events(self):
+        for var in self.event_vars:
+            var.set(False)
+        self.save_event_selection()
 
     # --- TAB 3: BERECHNUNG ---
     def setup_calc_tab(self):
