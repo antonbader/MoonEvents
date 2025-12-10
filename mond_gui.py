@@ -264,6 +264,9 @@ class MondApp(tk.Tk):
         ttk.Button(top_frame, text="Berechnen", command=self.run_calculation).pack(side='left', padx=10)
         ttk.Button(top_frame, text="PDF Export", command=self.export_pdf).pack(side='right')
 
+        # Hinweis
+        ttk.Label(top_frame, text="Hinweis: Für Details Eintrag doppelt anklicken.").pack(side='bottom', anchor='w', padx=5, pady=(5,0))
+
         tree_frame = ttk.Frame(self.tab_calc)
         tree_frame.pack(fill='both', expand=True, padx=10, pady=10)
         scrollbar = ttk.Scrollbar(tree_frame, orient="vertical")
@@ -272,6 +275,8 @@ class MondApp(tk.Tk):
         scrollbar.config(command=self.tree.yview)
         self.tree.pack(side='left', fill='both', expand=True)
         scrollbar.pack(side='right', fill='y')
+
+        self.tree.bind("<Double-1>", self.on_tree_double_click)
 
         self.tree.heading('Ereignis', text='Ereignis')
         self.tree.heading('Start', text='Start')
@@ -354,6 +359,120 @@ class MondApp(tk.Tk):
             self.tree.insert('', tk.END, values=(
                 row['event']['name'], s_str, p_str, tp_str, e_str, status_text, short_desc
             ), tags=(row_tag,))
+
+    def on_tree_double_click(self, event):
+        item_id = self.tree.identify_row(event.y)
+        if not item_id:
+            return
+
+        # Determine index in filtered_results
+        # tree.get_children() returns all items in order
+        children = self.tree.get_children()
+        try:
+            index = children.index(item_id)
+            if 0 <= index < len(self.filtered_results):
+                result = self.filtered_results[index]
+                self.show_detail_window(result)
+        except ValueError:
+            pass
+
+    def show_detail_window(self, result):
+        win = tk.Toplevel(self)
+        win.title(f"Details: {result['event']['name']}")
+        win.geometry("500x600")
+
+        # Main scrollable structure
+        container = ttk.Frame(win)
+        container.pack(fill='both', expand=True)
+
+        canvas = tk.Canvas(container)
+        scrollbar = ttk.Scrollbar(container, orient="vertical", command=canvas.yview)
+        scrollable_frame = ttk.Frame(canvas)
+
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+        # Bind mousewheel (optional but good for UX)
+        def _on_mousewheel(event):
+            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+        # Bind mousewheel only when mouse is over the scrollable area
+        def _bind_mousewheel(event):
+            canvas.bind_all("<MouseWheel>", _on_mousewheel)
+
+        def _unbind_mousewheel(event):
+            canvas.unbind_all("<MouseWheel>")
+
+        canvas.bind("<Enter>", _bind_mousewheel)
+        canvas.bind("<Leave>", _unbind_mousewheel)
+
+        # Content
+        pad_x = 10
+        pad_y = 5
+
+        # 1. Event Name (Bold)
+        lbl_name = tk.Label(scrollable_frame, text=result['event']['name'], font=("Helvetica", 14, "bold"))
+        lbl_name.pack(anchor='w', padx=pad_x, pady=(10, 5))
+
+        # 2. Visibility
+        lbl_vis = tk.Label(scrollable_frame, text=f"Sichtbarkeit: {result['status_text']}", font=("Helvetica", 10))
+        lbl_vis.pack(anchor='w', padx=pad_x, pady=pad_y)
+
+        # 3. Times
+        times_frame = ttk.LabelFrame(scrollable_frame, text="Zeiten (Lokal)")
+        times_frame.pack(fill='x', padx=pad_x, pady=pad_y)
+
+        times_data = [
+            ("Start:", result['start_local'].strftime("%d.%m.%Y %H:%M")),
+            ("Ende:", result['end_local'].strftime("%d.%m.%Y %H:%M")),
+            ("Optimum:", result['peak_local'].strftime("%d.%m.%Y %H:%M")),
+            ("Theor. Optimum:", result['theo_peak_local'].strftime("%d.%m.%Y %H:%M")),
+        ]
+
+        for i, (label, val) in enumerate(times_data):
+            tk.Label(times_frame, text=label, font=("Helvetica", 9, "bold")).grid(row=i, column=0, sticky='w', padx=5, pady=2)
+            tk.Label(times_frame, text=val).grid(row=i, column=1, sticky='w', padx=5, pady=2)
+
+        # 4. Details (Colong, Duration, Position, Phase)
+        details_frame = ttk.LabelFrame(scrollable_frame, text="Details")
+        details_frame.pack(fill='x', padx=pad_x, pady=pad_y)
+
+        # Colongitude
+        colong = result['event'].get('colong', 0)
+        tk.Label(details_frame, text="Colongitude:", font=("Helvetica", 9, "bold")).grid(row=0, column=0, sticky='w', padx=5, pady=2)
+        tk.Label(details_frame, text=f"{colong}°").grid(row=0, column=1, sticky='w', padx=5, pady=2)
+
+        # Duration
+        dur = result['event'].get('duration_min', 0)
+        tk.Label(details_frame, text="Dauer:", font=("Helvetica", 9, "bold")).grid(row=1, column=0, sticky='w', padx=5, pady=2)
+        tk.Label(details_frame, text=f"{dur} min").grid(row=1, column=1, sticky='w', padx=5, pady=2)
+
+        # Position
+        lat = result['event'].get('lat', 0)
+        lon = result['event'].get('lon', 0)
+        tk.Label(details_frame, text="Position:", font=("Helvetica", 9, "bold")).grid(row=2, column=0, sticky='w', padx=5, pady=2)
+        tk.Label(details_frame, text=f"Lat {lat}°, Lon {lon}°").grid(row=2, column=1, sticky='w', padx=5, pady=2)
+
+        # Phase
+        age = mond_berechnung.calculate_moon_age_approx(colong)
+        phase_text = mond_berechnung.get_phase_description(age)
+        tk.Label(details_frame, text="Phase:", font=("Helvetica", 9, "bold")).grid(row=3, column=0, sticky='w', padx=5, pady=2)
+        tk.Label(details_frame, text=f"{phase_text} (Tag {age:.1f})").grid(row=3, column=1, sticky='w', padx=5, pady=2)
+
+        # 5. Description
+        desc_frame = ttk.LabelFrame(scrollable_frame, text="Beschreibung")
+        desc_frame.pack(fill='both', expand=True, padx=pad_x, pady=pad_y)
+
+        lbl_desc = tk.Label(desc_frame, text=result['event']['desc'], wraplength=450, justify="left")
+        lbl_desc.pack(anchor='w', padx=5, pady=5)
 
     def export_pdf(self):
         if not self.filtered_results:
