@@ -47,12 +47,20 @@ def create_pdf(filename, results, location_name, offset, version_str, start_date
     pdf.set_auto_page_break(False)
     pdf.add_page()
     
-    w_event = 45
-    w_start = 35 
-    w_optimum = 35 
-    w_end = 35 
-    w_status = 40
-    w_desc = 85 
+    # A4 Landscape width is approx 297mm.
+    # Margins: let's assume standard margins (10mm left/right). Available ~277mm.
+    # We need to distribute space.
+    w_event = 40
+    w_start = 33
+    w_optimum = 33
+    w_theo = 33
+    w_end = 33
+    w_status = 45
+    # Remaining for desc. 40+30+30+30+30+45 = 205. 277 - 205 = 72.
+    w_desc = 0 # Will calculate remaining
+
+    page_width = pdf.w - pdf.l_margin - pdf.r_margin
+    w_desc = page_width - (w_event + w_start + w_optimum + w_theo + w_end + w_status)
     
     def print_table_header():
         pdf.set_font("Arial", 'B', 9)
@@ -61,6 +69,7 @@ def create_pdf(filename, results, location_name, offset, version_str, start_date
         pdf.cell(w_event, 8, "Ereignis", 1, 0, 'L', True)
         pdf.cell(w_start, 8, "Start", 1, 0, 'L', True)
         pdf.cell(w_optimum, 8, "Optimum", 1, 0, 'L', True)
+        pdf.cell(w_theo, 8, "Theor. Opt.", 1, 0, 'L', True)
         pdf.cell(w_end, 8, "Ende", 1, 0, 'L', True)
         pdf.cell(w_status, 8, "Sichtbarkeit", 1, 0, 'L', True)
         pdf.cell(w_desc, 8, "Beschreibung", 1, 1, 'L', True)
@@ -87,6 +96,7 @@ def create_pdf(filename, results, location_name, offset, version_str, start_date
         
         start_str = row['start_local'].strftime("%d.%m.%Y %H:%M")
         peak_str = row['peak_local'].strftime("%d.%m.%Y %H:%M")
+        theo_str = row['theo_peak_local'].strftime("%d.%m.%Y %H:%M")
         end_str = row['end_local'].strftime("%d.%m.%Y %H:%M")
         
         status = row['status_text']
@@ -101,7 +111,9 @@ def create_pdf(filename, results, location_name, offset, version_str, start_date
         except: pass
 
         lines_desc = pdf.get_lines_count(desc, w_desc - 2)
-        lines_status = pdf.get_lines_count(status, w_status - 2)
+        # Limit visibility to max 3 lines
+        lines_status = min(3, pdf.get_lines_count(status, w_status - 2))
+
         line_height_base = 5
         max_lines = max(lines_desc, lines_status)
         row_height = (max_lines * line_height_base) + 2
@@ -119,34 +131,47 @@ def create_pdf(filename, results, location_name, offset, version_str, start_date
         pdf.set_xy(x_start, y_start)
         pdf.cell(w_event, row_height, evt_name, 1, 0, 'L')
         
+        # Start
         if row['vis_start']: pdf.set_text_color(0, 128, 0)
         else: pdf.set_text_color(0, 0, 0)
         pdf.set_xy(x_start + w_event, y_start)
         pdf.set_font("Arial", size=8)
         pdf.cell(w_start, row_height, start_str, 1, 0, 'L')
         
+        # Optimum
         if row['vis_peak']: pdf.set_text_color(0, 128, 0)
         else: pdf.set_text_color(0, 0, 0)
         pdf.set_xy(x_start + w_event + w_start, y_start)
         pdf.cell(w_optimum, row_height, peak_str, 1, 0, 'L')
         
-        if row['vis_end']: pdf.set_text_color(0, 128, 0)
+        # Theor. Optimum
+        if row['vis_peak_theo']: pdf.set_text_color(0, 128, 0)
         else: pdf.set_text_color(0, 0, 0)
         pdf.set_xy(x_start + w_event + w_start + w_optimum, y_start)
+        pdf.cell(w_theo, row_height, theo_str, 1, 0, 'L')
+
+        # Ende
+        if row['vis_end']: pdf.set_text_color(0, 128, 0)
+        else: pdf.set_text_color(0, 0, 0)
+        pdf.set_xy(x_start + w_event + w_start + w_optimum + w_theo, y_start)
         pdf.cell(w_end, row_height, end_str, 1, 0, 'L')
         pdf.set_font("Arial", size=9)
         
+        # Sichtbarkeit
         if not row['visible']: pdf.set_text_color(100, 100, 100)
         else: pdf.set_text_color(0, 0, 0)
         
-        pdf.set_xy(x_start + w_event + w_start + w_optimum + w_end, y_start)
+        x_curr = x_start + w_event + w_start + w_optimum + w_theo + w_end
+        pdf.set_xy(x_curr, y_start)
         pdf.cell(w_status, row_height, "", 1) 
-        pdf.set_xy(x_start + w_event + w_start + w_optimum + w_end, y_start)
+        pdf.set_xy(x_curr, y_start)
         pdf.multi_cell(w_status, line_height_base, status, border=0, align='L')
         
-        pdf.set_xy(x_start + w_event + w_start + w_optimum + w_end + w_status, y_start)
+        # Beschreibung
+        x_curr += w_status
+        pdf.set_xy(x_curr, y_start)
         pdf.cell(w_desc, row_height, "", 1)
-        pdf.set_xy(x_start + w_event + w_start + w_optimum + w_end + w_status, y_start)
+        pdf.set_xy(x_curr, y_start)
         pdf.multi_cell(w_desc, line_height_base, desc, border=0, align='L')
         
         pdf.set_y(y_start + row_height)

@@ -238,7 +238,7 @@ class MondApp(tk.Tk):
         tree_frame = ttk.Frame(self.tab_calc)
         tree_frame.pack(fill='both', expand=True, padx=10, pady=10)
         scrollbar = ttk.Scrollbar(tree_frame, orient="vertical")
-        cols = ('Ereignis', 'Start', 'Optimum', 'Ende', 'Status', 'Beschreibung')
+        cols = ('Ereignis', 'Start', 'Optimum', 'TheorOpt', 'Ende', 'Status', 'Beschreibung')
         self.tree = ttk.Treeview(tree_frame, columns=cols, show='headings', yscrollcommand=scrollbar.set)
         scrollbar.config(command=self.tree.yview)
         self.tree.pack(side='left', fill='both', expand=True)
@@ -247,6 +247,7 @@ class MondApp(tk.Tk):
         self.tree.heading('Ereignis', text='Ereignis')
         self.tree.heading('Start', text='Start')
         self.tree.heading('Optimum', text='Optimum')
+        self.tree.heading('TheorOpt', text='Theor. Optimum')
         self.tree.heading('Ende', text='Ende')
         self.tree.heading('Status', text='Sichtbarkeit')
         self.tree.heading('Beschreibung', text='Beschreibung')
@@ -254,6 +255,7 @@ class MondApp(tk.Tk):
         self.tree.column('Ereignis', width=140)
         self.tree.column('Start', width=130)   
         self.tree.column('Optimum', width=130) 
+        self.tree.column('TheorOpt', width=130)
         self.tree.column('Ende', width=130)    
         self.tree.column('Status', width=180)
         self.tree.column('Beschreibung', width=300)
@@ -306,6 +308,7 @@ class MondApp(tk.Tk):
             
             s_str = row['start_local'].strftime("%d.%m.%Y %H:%M")
             p_str = row['peak_local'].strftime("%d.%m.%Y %H:%M")
+            tp_str = row['theo_peak_local'].strftime("%d.%m.%Y %H:%M")
             e_str = row['end_local'].strftime("%d.%m.%Y %H:%M")
             
             status_text = row['status_text']
@@ -314,7 +317,7 @@ class MondApp(tk.Tk):
             
             row_tag = 'good' if row['visible'] else 'bad'
             self.tree.insert('', tk.END, values=(
-                row['event']['name'], s_str, p_str, e_str, status_text, short_desc
+                row['event']['name'], s_str, p_str, tp_str, e_str, status_text, short_desc
             ), tags=(row_tag,))
 
     def export_pdf(self):
