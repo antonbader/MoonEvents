@@ -22,6 +22,7 @@ class MondApp(tk.Tk):
         self.events_db = mond_daten.EREIGNISSE_DB
         self.version_info = self.load_config()
         self.var_show_only_visible = tk.BooleanVar(value=False)
+        self.last_visible_event_names = set()
 
         self.create_widgets()
 
@@ -66,6 +67,17 @@ class MondApp(tk.Tk):
 
     # --- TAB KARTE ---
     def setup_map_tab(self):
+        # Control Frame
+        ctrl_frame = ttk.Frame(self.tab_map)
+        ctrl_frame.pack(fill='x', padx=5, pady=5)
+
+        self.var_map_filter_visible = tk.BooleanVar(value=False)
+        self.chk_map_visible = ttk.Checkbutton(ctrl_frame, text="Nur beobachtbare anzeigen (Berechnung erforderlich)",
+                                               variable=self.var_map_filter_visible,
+                                               command=self.update_map_filter,
+                                               state='disabled')
+        self.chk_map_visible.pack(side='left')
+
         self.map_widget = mond_map.MoonMap(self.tab_map)
         self.map_widget.pack(fill='both', expand=True)
         # Load initial selection
@@ -81,9 +93,17 @@ class MondApp(tk.Tk):
         if tab_text == "Karte":
             self.update_map_selection()
 
+    def update_map_filter(self):
+        self.update_map_selection()
+
     def update_map_selection(self):
         sel_indices = self.app_data.get('selected_events_indices', [])
         selected_events = [self.events_db[i] for i in sel_indices if i < len(self.events_db)]
+
+        # Filter logic
+        if self.var_map_filter_visible.get():
+            selected_events = [e for e in selected_events if e['name'] in self.last_visible_event_names]
+
         self.map_widget.update_events(selected_events)
 
     # --- TAB INFO ---
@@ -301,6 +321,12 @@ class MondApp(tk.Tk):
                 start_dt_utc, end_dt_utc, selected_events, location
             )
             self.current_results = raw_results
+
+            # Update Map Filter Data
+            self.last_visible_event_names = {res['event']['name'] for res in raw_results if res['visible']}
+            if hasattr(self, 'chk_map_visible'):
+                self.chk_map_visible.config(state='normal')
+
             self.update_tree_display()
         finally:
             self.config(cursor="")
