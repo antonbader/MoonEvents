@@ -178,9 +178,26 @@ def calculate_all_events(start_datetime_utc, end_datetime_utc, selected_events, 
             
     results.sort(key=lambda x: x['peak_local'])
     return results
+
 def calculate_moon_age_approx(colongitude):
     """
     Berechnet das ungefähre Mondalter (in Tagen seit Neumond) basierend auf der Colongitude.
     Formel: ((colong - 270) % 360) / 12.2
     """
     return ((colongitude - 270) % 360) / 12.2
+
+def get_phase_description(age):
+    """
+    Gibt eine Textbeschreibung der Mondphase basierend auf dem Mondalter (Tage) zurück.
+    """
+    # Normalisierung falls age < 0 oder > 29.53 (sollte bei approx formel nicht passieren, aber sicher ist sicher)
+    age = age % 29.53059
+
+    if age < 1.0 or age > 28.5:
+        return "Neumond"
+    elif age < 13.5:
+        return "Zunehmender Mond"
+    elif age <= 16.0:
+        return "Vollmond"
+    else:
+        return "Abnehmender Mond"
