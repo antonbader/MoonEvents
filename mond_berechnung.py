@@ -178,3 +178,9 @@ def calculate_all_events(start_datetime_utc, end_datetime_utc, selected_events, 
             
     results.sort(key=lambda x: x['peak_local'])
     return results
+def calculate_moon_age_approx(colongitude):
+    """
+    Berechnet das ungefähre Mondalter (in Tagen seit Neumond) basierend auf der Colongitude.
+    Formel: ((colong - 270) % 360) / 12.2
+    """
+    return ((colongitude - 270) % 360) / 12.2
