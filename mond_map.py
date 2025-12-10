@@ -95,17 +95,13 @@ class MoonMap(ttk.Frame):
         # For the Wikipedia LRO image, it is quite tight.
         radius = (min(self.current_img_w, self.current_img_h) / 2) * 0.98
 
+        # Calculate positions first
+        events_with_pos = []
         for event in self.current_events:
             lat = event.get('lat', 0)
             lon = event.get('lon', 0)
 
             # Orthographic Projection
-            # x = R * cos(lat) * sin(lon)
-            # y = R * sin(lat)
-            # Note: Screen Y is inverted (down is positive).
-            # North is Up (negative Y relative to center).
-            # East is Right (positive X relative to center).
-
             rad_lat = math.radians(lat)
             rad_lon = math.radians(lon)
 
@@ -117,11 +113,76 @@ class MoonMap(ttk.Frame):
             screen_x = cx + (x_proj * radius)
             screen_y = cy - (y_proj * radius) # Minus because screen Y grows downwards
 
+            events_with_pos.append({
+                'event': event,
+                'x': screen_x,
+                'y': screen_y
+            })
+
+        # Sort by Y to process top-down (helps with stacking)
+        events_with_pos.sort(key=lambda item: item['y'])
+
+        occupied_bboxes = []
+
+        for item in events_with_pos:
+            screen_x = item['x']
+            screen_y = item['y']
+            event_name = item['event']['name']
+
             # Draw Marker
             r = 4 # Marker radius
             self.canvas.create_oval(screen_x - r, screen_y - r, screen_x + r, screen_y + r,
                                     fill='red', outline='white', width=2, tags="marker")
 
-            # Draw Label
-            self.canvas.create_text(screen_x + r + 4, screen_y, text=event['name'],
+            # Draw Label - Initial Position
+            label_x = screen_x + r + 4
+            label_y = screen_y
+
+            text_id = self.canvas.create_text(label_x, label_y, text=event_name,
                                     anchor='w', fill='#FFFF00', font=('Arial', 10, 'bold'), tags="marker")
+
+            # Collision Detection and Adjustment
+            bbox = self.canvas.bbox(text_id) # (x1, y1, x2, y2)
+
+            if not bbox:
+                continue
+
+            shifts = 0
+            max_shifts = 50
+            # Height of text (approximate step)
+            step_y = (bbox[3] - bbox[1])
+            if step_y < 5: step_y = 15 # Fallback
+
+            has_collision = True
+            while has_collision and shifts < max_shifts:
+                has_collision = False
+                current_bbox = self.canvas.bbox(text_id)
+
+                # Check against all occupied bboxes
+                for occ in occupied_bboxes:
+                    # Overlap logic
+                    if not (current_bbox[2] < occ[0] or \
+                            current_bbox[0] > occ[2] or \
+                            current_bbox[3] < occ[1] or \
+                            current_bbox[1] > occ[3]):
+                        has_collision = True
+                        break
+
+                if has_collision:
+                    # Move down
+                    self.canvas.move(text_id, 0, step_y)
+                    shifts += 1
+
+            # If we shifted, draw a line from marker to text
+            if shifts > 0:
+                final_bbox = self.canvas.bbox(text_id)
+                text_left_x = final_bbox[0]
+                text_cent_y = (final_bbox[1] + final_bbox[3]) / 2
+
+                # Draw connecting line
+                line_id = self.canvas.create_line(screen_x, screen_y, text_left_x, text_cent_y,
+                                        fill='white', width=1, tags="marker")
+                # Lower line so text is on top
+                self.canvas.tag_lower(line_id, text_id)
+
+            occupied_bboxes.append(self.canvas.bbox(text_id))
