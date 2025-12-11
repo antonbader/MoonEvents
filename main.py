@@ -1,4 +1,4 @@
-from mond_gui import MondApp
+from moon_events.gui import MondApp
 
 if __name__ == "__main__":
     app = MondApp()

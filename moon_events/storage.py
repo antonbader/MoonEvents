@@ -1,7 +1,7 @@
 # mond_storage.py
 import json
 import os
-from mond_daten import get_default_location, EREIGNISSE_DB
+from .data import get_default_location, EREIGNISSE_DB
 
 FILENAME = "mond_einstellungen.json"
 
