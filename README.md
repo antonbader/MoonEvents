@@ -8,7 +8,8 @@ MoonEvents ist eine Python-Anwendung zur Berechnung und Visualisierung von lunar
 *   **Ereignisdatenbank:** Auswahl aus einer vordefinierten Liste von Mondereignissen ("Lunar 100" etc.).
 *   **Präzise Berechnung:** Ermittlung der Sichtbarkeit basierend auf Mond- und Sonnenstand (Sichtbarkeit nur wenn Sonne < 0° und Mond > 5°).
 *   **Optimierung:** Wenn das theoretische Maximum nicht sichtbar ist, sucht das Programm nach dem bestmöglichen Zeitpunkt innerhalb des Ereignisfensters.
-*   **Visualisierung:** Interaktive Mondkarte, die die Position der ausgewählten Ereignisse anzeigt.
+*   **Detail-Ansicht:** Detaillierte Informationen zu jedem berechneten Ereignis (Position, Mondphase, genaue Zeiten) per Doppelklick.
+*   **Visualisierung:** Interaktive Mondkarte, die die Position der ausgewählten Ereignisse anzeigt (inkl. Filter für sichtbare Ereignisse).
 *   **PDF-Export:** Exportieren der Berechnungslisten als PDF für den Feldeinsatz.
 
 ## Projektstruktur
@@ -40,7 +41,8 @@ Die Anwendung benötigt **Python 3.x**.
     *   `ephem`: Für astronomische Berechnungen.
     *   `tkcalendar`: Für die Datumsauswahl in der GUI.
     *   `fpdf`: Für den PDF-Export.
-    *   `Pillow` & `requests`: Für Bildverarbeitung.
+    *   `Pillow`: Für Bildverarbeitung.
+    *   `requests`: Für Netzwerkoperationen.
 
 ## Starten der Anwendung
 

@@ -21,7 +21,7 @@ Damit die Berechnungen korrekt sind, muss das Programm wissen, von wo aus Sie be
 
 Hier bestimmen Sie, *was* Sie beobachten möchten.
 
-*   **Liste:** Eine Liste aller verfügbaren Mondereignisse (z.B. Krater, Gebirge, spezielle Lichtstrahlen).
+*   **Liste:** Eine Liste aller verfügbaren Mondereignisse (z.B. Krater, Gebirge, spezielle Lichtstrahlen). Hinter dem Namen wird das ungefähre Mondalter in Tagen angezeigt (z.B. "Tag 10.5"), was einen Hinweis auf die benötigte Mondphase gibt.
 *   **Auswahl:** Setzen Sie Häkchen bei den Ereignissen, die Sie interessieren.
 *   **Buttons:** Nutzen Sie "Alle auswählen" oder "Alle abwählen" für eine schnelle Selektion.
 
@@ -38,11 +38,19 @@ Das Herzstück der Anwendung. Hier planen Sie den Zeitraum.
     *   **Optimum:** Der *beste sichtbare* Zeitpunkt für Ihren Standort (siehe unten "Erklärung der Berechnung").
     *   **Theor. Optimum:** Der *geometrisch* perfekte Zeitpunkt (unabhängig von Sichtbarkeit).
     *   **Status:** "Gut beobachtbar" (Grün) oder ein Grund für schlechte Sichtbarkeit (Rot, z.B. "Mond unter Horizont").
-*   **PDF Export:** Speichert die aktuelle Liste als PDF-Datei, ideal zum Ausdrucken und Mitnehmen ans Teleskop.
+*   **Detail-Ansicht:** Ein **Doppelklick** auf eine Zeile öffnet ein Fenster mit weiteren Details:
+    *   Genaue Zeiten für Start, Optimum, theor. Optimum und Ende.
+    *   Positionsdaten (Breite/Länge) und Colongitude.
+    *   Aktuelle Mondphase und Mondalter.
+    *   Vollständige Beschreibungstexte.
+*   **PDF Export:** Speichert die aktuelle Liste als PDF-Datei. In der PDF werden Zeiten, zu denen das Ereignis tatsächlich sichtbar ist (Mond über Horizont, Sonne unter Horizont), **grün** hervorgehoben.
 
 ### 4. Karte
 
-Dieser Reiter visualisiert die Lage der *ausgewählten* Ereignisse auf einer schematischen Mondkarte. So können Sie sehen, wo sich die Krater befinden.
+Dieser Reiter visualisiert die Lage der *ausgewählten* Ereignisse auf einer schematischen Mondkarte.
+
+*   **Darstellung:** Die ausgewählten Ereignisse werden als Punkte auf der Karte markiert.
+*   **Filter "Nur beobachtbare anzeigen":** Über dem Kartenbild befindet sich eine Checkbox. Diese wird aktiviert, sobald eine Berechnung durchgeführt wurde. Wenn Sie den Haken setzen, werden auf der Karte nur jene Ereignisse angezeigt, die im berechneten Zeitraum tatsächlich sichtbar sind. Dies hilft bei der schnellen Orientierung für die kommende Beobachtungsnacht.
 
 ### 5. Info
 
