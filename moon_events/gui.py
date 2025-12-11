@@ -6,11 +6,11 @@ import configparser
 import webbrowser
 import os
 
-import mond_daten
-import mond_storage
-import mond_berechnung
-import mond_pdf
-import mond_map
+from . import data
+from . import storage
+from . import calculations
+from . import pdf
+from . import map
 
 class MondApp(tk.Tk):
     def __init__(self):
@@ -18,8 +18,8 @@ class MondApp(tk.Tk):
         self.title("MoonEvents - Mondereignis-Rechner")
         self.geometry("1400x850")
 
-        self.app_data = mond_storage.load_data()
-        self.events_db = mond_daten.EREIGNISSE_DB
+        self.app_data = storage.load_data()
+        self.events_db = data.EREIGNISSE_DB
         self.version_info = self.load_config()
         self.var_show_only_visible = tk.BooleanVar(value=False)
         self.last_visible_event_names = set()
@@ -62,7 +62,7 @@ class MondApp(tk.Tk):
         self.setup_info_tab()
 
     def on_closing(self):
-        mond_storage.save_data(self.app_data)
+        storage.save_data(self.app_data)
         self.destroy()
 
     # --- TAB KARTE ---
@@ -78,7 +78,7 @@ class MondApp(tk.Tk):
                                                state='disabled')
         self.chk_map_visible.pack(side='left')
 
-        self.map_widget = mond_map.MoonMap(self.tab_map)
+        self.map_widget = map.MoonMap(self.tab_map)
         self.map_widget.pack(fill='both', expand=True)
         # Load initial selection
         self.update_map_selection()
@@ -176,7 +176,7 @@ class MondApp(tk.Tk):
                        "timezone_offset": int(self.entry_offset.get())}
             self.app_data['locations'].append(new_loc)
             self.refresh_loc_list()
-            mond_storage.save_data(self.app_data)
+            storage.save_data(self.app_data)
         except: messagebox.showerror("Fehler", "Eingabe prüfen.")
     def delete_location(self):
         sel = self.loc_listbox.curselection()
@@ -184,13 +184,13 @@ class MondApp(tk.Tk):
         del self.app_data['locations'][sel[0]]
         self.app_data['selected_location_index'] = 0
         self.refresh_loc_list()
-        mond_storage.save_data(self.app_data)
+        storage.save_data(self.app_data)
     def set_active_location(self):
         sel = self.loc_listbox.curselection()
         if not sel: return
         self.app_data['selected_location_index'] = sel[0]
         self.refresh_loc_list()
-        mond_storage.save_data(self.app_data)
+        storage.save_data(self.app_data)
 
     # --- TAB 2: EREIGNISSE ---
     def setup_events_tab(self):
@@ -216,7 +216,7 @@ class MondApp(tk.Tk):
             var = tk.BooleanVar(value=(i in sel_indices))
 
             # Mondalter berechnen und Text anpassen
-            moon_age = mond_berechnung.calculate_moon_age_approx(event.get('colong', 0))
+            moon_age = calculations.calculate_moon_age_approx(event.get('colong', 0))
             display_text = f"{event['name']} (Tag {moon_age:.1f})"
 
             chk = ttk.Checkbutton(scroll_frame, text=display_text, variable=var, command=self.save_event_selection)
@@ -229,7 +229,7 @@ class MondApp(tk.Tk):
             self.event_vars.append(var)
     def save_event_selection(self):
         self.app_data['selected_events_indices'] = [i for i, var in enumerate(self.event_vars) if var.get()]
-        mond_storage.save_data(self.app_data)
+        storage.save_data(self.app_data)
         # Update map if it exists
         if hasattr(self, 'map_widget'):
             self.update_map_selection()
@@ -316,13 +316,13 @@ class MondApp(tk.Tk):
             return
         offset = location.get('timezone_offset', 1)
         start_dt_local = datetime.combine(d_start, time(0,0,0))
-        start_dt_utc = start_dt_local - mond_berechnung.timedelta(hours=offset)
+        start_dt_utc = start_dt_local - calculations.timedelta(hours=offset)
         end_dt_local = datetime.combine(d_end, time(23,59,59))
-        end_dt_utc = end_dt_local - mond_berechnung.timedelta(hours=offset)
+        end_dt_utc = end_dt_local - calculations.timedelta(hours=offset)
         self.config(cursor="watch")
         self.update()
         try:
-            raw_results = mond_berechnung.calculate_all_events(
+            raw_results = calculations.calculate_all_events(
                 start_dt_utc, end_dt_utc, selected_events, location
             )
             self.current_results = raw_results
@@ -462,8 +462,8 @@ class MondApp(tk.Tk):
         tk.Label(details_frame, text=f"Lat {lat}°, Lon {lon}°").grid(row=2, column=1, sticky='w', padx=5, pady=2)
 
         # Phase
-        age = mond_berechnung.calculate_moon_age_approx(colong)
-        phase_text = mond_berechnung.get_phase_description(age)
+        age = calculations.calculate_moon_age_approx(colong)
+        phase_text = calculations.get_phase_description(age)
         tk.Label(details_frame, text="Phase:", font=("Helvetica", 9, "bold")).grid(row=3, column=0, sticky='w', padx=5, pady=2)
         tk.Label(details_frame, text=f"{phase_text} (Tag {age:.1f})").grid(row=3, column=1, sticky='w', padx=5, pady=2)
 
@@ -485,7 +485,7 @@ class MondApp(tk.Tk):
             current_version = self.version_info.get('version', '1.0')
             d_start = self.date_entry_start.get_date()
             d_end = self.date_entry_end.get_date()
-            mond_pdf.create_pdf(
+            pdf.create_pdf(
                 filename, self.filtered_results, loc['name'], loc.get('timezone_offset', 1),
                 current_version, d_start, d_end
             )

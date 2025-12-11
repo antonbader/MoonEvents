@@ -15,12 +15,13 @@ MoonEvents ist eine Python-Anwendung zur Berechnung und Visualisierung von lunar
 ## Projektstruktur
 
 *   `main.py`: Einstiegspunkt der Anwendung.
-*   `mond_gui.py`: Hauptfenster und UI-Logik (Tkinter).
-*   `mond_berechnung.py`: Astronomische Berechnungen (Ephem).
-*   `mond_daten.py`: Datenbank der Mondereignisse (Koordinaten, Ziel-Colongitude).
-*   `mond_map.py`: Kartenvisualisierung.
-*   `mond_pdf.py`: PDF-Generierung.
-*   `mond_storage.py`: Speichern/Laden von Benutzerdaten (Orte, Selektionen).
+*   `moon_events/`: Paket mit dem Quellcode.
+    *   `gui.py`: Hauptfenster und UI-Logik (Tkinter).
+    *   `calculations.py`: Astronomische Berechnungen (Ephem).
+    *   `data.py`: Datenbank der Mondereignisse (Koordinaten, Ziel-Colongitude).
+    *   `map.py`: Kartenvisualisierung.
+    *   `pdf.py`: PDF-Generierung.
+    *   `storage.py`: Speichern/Laden von Benutzerdaten (Orte, Selektionen).
 
 ## Installation
 
