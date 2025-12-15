@@ -34,16 +34,20 @@ Das Herzstück der Anwendung. Hier planen Sie den Zeitraum.
 *   **Berechnen:** Startet den Suchlauf. Das Programm prüft für jedes gewählte Ereignis, wann im gewählten Zeitraum die Beleuchtung optimal ist.
 *   **Ergebnistabelle:**
     *   **Ereignis:** Name des Objekts.
-    *   **Start / Ende:** Beginn und Ende des Zeitfensters, in dem der Lichteffekt sichtbar ist.
+    *   **Start:** Beginn des Zeitfensters, in dem der Lichteffekt sichtbar ist.
     *   **Optimum:** Der *beste sichtbare* Zeitpunkt für Ihren Standort (siehe unten "Erklärung der Berechnung").
     *   **Theor. Optimum:** Der *geometrisch* perfekte Zeitpunkt (unabhängig von Sichtbarkeit).
+    *   **Ende:** Ende des Zeitfensters.
     *   **Status:** "Gut beobachtbar" (Grün) oder ein Grund für schlechte Sichtbarkeit (Rot, z.B. "Mond unter Horizont").
+    *   **Schwierigkeit:** Einschätzung, wie schwierig das Objekt zu beobachten ist.
+    *   **Beschreibung:** Kurzbeschreibung des Ereignisses.
 *   **Detail-Ansicht:** Ein **Doppelklick** auf eine Zeile öffnet ein Fenster mit weiteren Details:
     *   Genaue Zeiten für Start, Optimum, theor. Optimum und Ende.
     *   Positionsdaten (Breite/Länge) und Colongitude.
     *   Aktuelle Mondphase und Mondalter.
     *   Vollständige Beschreibungstexte.
-*   **PDF Export:** Speichert die aktuelle Liste als PDF-Datei. In der PDF werden Zeiten, zu denen das Ereignis tatsächlich sichtbar ist (Mond über Horizont, Sonne unter Horizont), **grün** hervorgehoben.
+    *   **Schwierigkeit & Tipps:** Anzeige des Schwierigkeitsgrades und spezifische Beobachtungstipps.
+*   **PDF Export:** Speichert die aktuelle Liste (inkl. Schwierigkeit und Beschreibung) als PDF-Datei. In der PDF werden Zeiten, zu denen das Ereignis tatsächlich sichtbar ist (Mond über Horizont, Sonne unter Horizont), **grün** hervorgehoben.
 
 ### 4. Karte
 
@@ -54,7 +58,7 @@ Dieser Reiter visualisiert die Lage der *ausgewählten* Ereignisse auf einer sch
 
 ### 5. Info
 
-Hier finden Sie Versionsnummer und Kontaktinformationen.
+Hier finden Sie die Versionsnummer, die Version der verwendeten Ereignis-Datenbank (Daten-Version) und Kontaktinformationen.
 
 ---
 
