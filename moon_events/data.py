@@ -9,6 +9,8 @@ Kalibrierung: Stand 2025/2026 (Referenzwerte optimiert für realistische Sichtba
 Version: 2.3 - Schwierigkeit + Tipps integriert
 """
 
+DB_VERSION = "2.3"
+
 EREIGNISSE_DB = [
     # --- ZUNEHMENDER MOND (Tag 0 bis ca. 14) ---
     {
