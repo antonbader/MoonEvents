@@ -119,7 +119,10 @@ class MondApp(tk.Tk):
         lbl_ver.pack()
         d_text = f"Datum: {self.version_info['date']}"
         lbl_date = tk.Label(frame, text=d_text, font=("Helvetica", 10))
-        lbl_date.pack(pady=(0, 30))
+        lbl_date.pack()
+        dv_text = f"Daten-Version: {data.DB_VERSION}"
+        lbl_dv = tk.Label(frame, text=dv_text, font=("Helvetica", 10))
+        lbl_dv.pack(pady=(0, 30))
         lbl_email = tk.Label(frame, text="info@anton-bader.de", font=("Helvetica", 10))
         lbl_email.pack()
         link_text = "https://www.anton-bader.de"
