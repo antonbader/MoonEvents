@@ -1,5 +1,7 @@
 # MoonEvents - Benutzerhandbuch
 
+(für Version 0.4.3)
+
 Willkommen bei **MoonEvents**, Ihrem Werkzeug zur Planung von Mondbeobachtungen. Dieses Programm hilft Ihnen, den perfekten Zeitpunkt zu finden, um spezielle Lichteffekte auf dem Mond (wie Krateraufgänge oder Schattenwürfe) zu beobachten.
 
 ## Erste Schritte
