@@ -270,7 +270,7 @@ class MondApp(tk.Tk):
         tree_frame = ttk.Frame(self.tab_calc)
         tree_frame.pack(fill='both', expand=True, padx=10, pady=10)
         scrollbar = ttk.Scrollbar(tree_frame, orient="vertical")
-        cols = ('Ereignis', 'Start', 'Optimum', 'TheorOpt', 'Ende', 'Status', 'Beschreibung')
+        cols = ('Ereignis', 'Start', 'Optimum', 'TheorOpt', 'Ende', 'Status', 'Schwierigkeit', 'Beschreibung')
         self.tree = ttk.Treeview(tree_frame, columns=cols, show='headings', yscrollcommand=scrollbar.set)
         scrollbar.config(command=self.tree.yview)
         self.tree.pack(side='left', fill='both', expand=True)
@@ -284,6 +284,7 @@ class MondApp(tk.Tk):
         self.tree.heading('TheorOpt', text='Theor. Optimum')
         self.tree.heading('Ende', text='Ende')
         self.tree.heading('Status', text='Sichtbarkeit')
+        self.tree.heading('Schwierigkeit', text='Schwierigkeit')
         self.tree.heading('Beschreibung', text='Beschreibung')
 
         self.tree.column('Ereignis', width=140)
@@ -292,6 +293,7 @@ class MondApp(tk.Tk):
         self.tree.column('TheorOpt', width=130)
         self.tree.column('Ende', width=130)
         self.tree.column('Status', width=180)
+        self.tree.column('Schwierigkeit', width=100)
         self.tree.column('Beschreibung', width=300)
 
         self.tree.tag_configure('good', foreground='green')
@@ -352,12 +354,13 @@ class MondApp(tk.Tk):
             e_str = row['end_local'].strftime("%d.%m.%Y %H:%M")
 
             status_text = row['status_text']
+            difficulty = row['event'].get('difficulty', '-')
             full_desc = row['event']['desc']
             short_desc = (full_desc[:60] + '..') if len(full_desc) > 60 else full_desc
 
             row_tag = 'good' if row['visible'] else 'bad'
             self.tree.insert('', tk.END, values=(
-                row['event']['name'], s_str, p_str, tp_str, e_str, status_text, short_desc
+                row['event']['name'], s_str, p_str, tp_str, e_str, status_text, difficulty, short_desc
             ), tags=(row_tag,))
 
     def on_tree_double_click(self, event):
@@ -473,6 +476,19 @@ class MondApp(tk.Tk):
 
         lbl_desc = tk.Label(desc_frame, text=result['event']['desc'], wraplength=450, justify="left")
         lbl_desc.pack(anchor='w', padx=5, pady=5)
+
+        # 6. Difficulty & Tips
+        diff_frame = ttk.LabelFrame(scrollable_frame, text="Schwierigkeit & Tipps")
+        diff_frame.pack(fill='both', expand=True, padx=pad_x, pady=pad_y)
+
+        difficulty = result['event'].get('difficulty', '-')
+        difficulty_tip = result['event'].get('difficulty_tip', '-')
+
+        tk.Label(diff_frame, text="Schwierigkeitsgrad:", font=("Helvetica", 9, "bold")).pack(anchor='w', padx=5, pady=(5, 2))
+        tk.Label(diff_frame, text=difficulty).pack(anchor='w', padx=15, pady=(0, 5))
+
+        tk.Label(diff_frame, text="Beobachtungstipp:", font=("Helvetica", 9, "bold")).pack(anchor='w', padx=5, pady=(5, 2))
+        tk.Label(diff_frame, text=difficulty_tip, wraplength=450, justify="left").pack(anchor='w', padx=15, pady=(0, 5))
 
     def export_pdf(self):
         if not self.filtered_results:

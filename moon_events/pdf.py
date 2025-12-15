@@ -51,16 +51,17 @@ def create_pdf(filename, results, location_name, offset, version_str, start_date
     # Margins: let's assume standard margins (10mm left/right). Available ~277mm.
     # We need to distribute space.
     w_event = 40
-    w_start = 33
-    w_optimum = 33
-    w_theo = 33
-    w_end = 33
-    w_status = 45
-    # Remaining for desc. 40+30+30+30+30+45 = 205. 277 - 205 = 72.
+    w_start = 28
+    w_optimum = 28
+    w_theo = 28
+    w_end = 28
+    w_status = 40
+    w_diff = 25
+    # Remaining for desc. 40+28*4+40+25 = 217. 277 - 217 = 60.
     w_desc = 0 # Will calculate remaining
 
     page_width = pdf.w - pdf.l_margin - pdf.r_margin
-    w_desc = page_width - (w_event + w_start + w_optimum + w_theo + w_end + w_status)
+    w_desc = page_width - (w_event + w_start + w_optimum + w_theo + w_end + w_status + w_diff)
     
     def print_table_header():
         pdf.set_font("Arial", 'B', 9)
@@ -72,6 +73,7 @@ def create_pdf(filename, results, location_name, offset, version_str, start_date
         pdf.cell(w_theo, 8, "Theor. Opt.", 1, 0, 'L', True)
         pdf.cell(w_end, 8, "Ende", 1, 0, 'L', True)
         pdf.cell(w_status, 8, "Sichtbarkeit", 1, 0, 'L', True)
+        pdf.cell(w_diff, 8, "Schwierigkeit", 1, 0, 'L', True)
         pdf.cell(w_desc, 8, "Beschreibung", 1, 1, 'L', True)
         pdf.ln()
 
@@ -103,11 +105,13 @@ def create_pdf(filename, results, location_name, offset, version_str, start_date
         if row['visible']:
             status += f" (Alt: {row['moon_alt']:.1f}°)"
         desc = row['event']['desc']
+        difficulty = row['event'].get('difficulty', '-')
         
         try:
             evt_name = evt_name.encode('latin-1', 'replace').decode('latin-1')
             desc = desc.encode('latin-1', 'replace').decode('latin-1')
             status = status.encode('latin-1', 'replace').decode('latin-1')
+            difficulty = difficulty.encode('latin-1', 'replace').decode('latin-1')
         except: pass
 
         lines_desc = pdf.get_lines_count(desc, w_desc - 2)
@@ -166,9 +170,15 @@ def create_pdf(filename, results, location_name, offset, version_str, start_date
         pdf.cell(w_status, row_height, "", 1) 
         pdf.set_xy(x_curr, y_start)
         pdf.multi_cell(w_status, line_height_base, status, border=0, align='L')
+
+        # Schwierigkeit
+        pdf.set_text_color(0, 0, 0)
+        x_curr += w_status
+        pdf.set_xy(x_curr, y_start)
+        pdf.cell(w_diff, row_height, difficulty, 1, 0, 'C') # Centered for difficulty
         
         # Beschreibung
-        x_curr += w_status
+        x_curr += w_diff
         pdf.set_xy(x_curr, y_start)
         pdf.cell(w_desc, row_height, "", 1)
         pdf.set_xy(x_curr, y_start)
