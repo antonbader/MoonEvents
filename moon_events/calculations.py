@@ -2,6 +2,7 @@
 import ephem
 import math
 from datetime import datetime, timedelta
+from moon_events.calculation_logic import EphemCalculator
 
 def get_colongitude_deg(date_obj):
     m = ephem.Moon()
@@ -9,42 +10,6 @@ def get_colongitude_deg(date_obj):
     observer.date = date_obj
     m.compute(observer)
     return math.degrees(m.colong)
-
-def get_observability(date_utc, location_data):
-    """
-    Prüft Sichtbarkeit.
-    Return: (is_visible, reason, moon_alt, sun_alt)
-    """
-    observer = ephem.Observer()
-    observer.lat = str(location_data['lat'])
-    observer.lon = str(location_data['lon'])
-    observer.elevation = location_data['elevation']
-    observer.date = date_utc
-    
-    moon = ephem.Moon()
-    sun = ephem.Sun()
-    moon.compute(observer)
-    sun.compute(observer)
-    
-    moon_alt_deg = math.degrees(moon.alt)
-    sun_alt_deg = math.degrees(sun.alt)
-    
-    reasons = []
-    is_good = True
-    
-    # Kriterien: Mond > 5° und Sonne < 0° (Exakt Sonnenuntergang)
-    if moon_alt_deg < 5:
-        is_good = False
-        if moon_alt_deg < 0: reasons.append("Mond unter Horizont")
-        else: reasons.append("Mond zu tief (<5°)")
-            
-    # HIER IST DIE WICHTIGE ÄNDERUNG: 0 statt -0.5 oder -6
-    if sun_alt_deg > 0:
-        is_good = False
-        reasons.append("Taghimmel (Sonne > 0°)")
-            
-    status_text = "Gut beobachtbar" if is_good else ", ".join(reasons)
-    return is_good, status_text, moon_alt_deg, sun_alt_deg
 
 def find_next_event_peak(start_date, target_colong):
     """Findet den nächsten Colongitude-Peak (Theoretisches Optimum)."""
@@ -75,7 +40,7 @@ def find_next_event_peak(start_date, target_colong):
 
     return search_date.datetime()
 
-def find_best_visible_moment(start_utc, end_utc, location_data):
+def find_best_visible_moment(start_utc, end_utc, calculator: EphemCalculator):
     """
     Scannt den Zeitraum [start_utc, end_utc] nach dem besten Beobachtungsmoment.
     Bestimmt den Zeitpunkt mit der höchsten Mondhöhe innerhalb der Sichtbarkeit.
@@ -87,7 +52,7 @@ def find_best_visible_moment(start_utc, end_utc, location_data):
     # Wir scannen in 5-Minuten-Schritten
     curr = start_utc
     while curr <= end_utc:
-        is_vis, _, m_alt, _ = get_observability(curr, location_data)
+        is_vis, _, m_alt, _ = calculator.get_observability(curr)
         
         if is_vis:
             if m_alt > max_alt:
@@ -98,7 +63,7 @@ def find_best_visible_moment(start_utc, end_utc, location_data):
         
     return best_time, max_alt
 
-def calculate_all_events(start_datetime_utc, end_datetime_utc, selected_events, location_data):
+def calculate_all_events(start_datetime_utc, end_datetime_utc, selected_events, location_data, calculator: EphemCalculator):
     results = []
     offset = location_data.get("timezone_offset", 1)
     
@@ -119,7 +84,7 @@ def calculate_all_events(start_datetime_utc, end_datetime_utc, selected_events, 
             end_utc = theo_peak_utc + half_duration
             
             # 3. Sichtbarkeits-Check
-            vis_peak_theo, reason_peak, m_alt_peak, _ = get_observability(theo_peak_utc, location_data)
+            vis_peak_theo, reason_peak, m_alt_peak, _ = calculator.get_observability(theo_peak_utc)
             
             # Initiale Werte
             final_peak_utc = theo_peak_utc
@@ -129,7 +94,7 @@ def calculate_all_events(start_datetime_utc, end_datetime_utc, selected_events, 
             
             # 4. Optimum anpassen (Nur wenn theoretischer Peak NICHT sichtbar ist)
             if not vis_peak_theo:
-                best_alt_time, best_alt_val = find_best_visible_moment(start_utc, end_utc, location_data)
+                best_alt_time, best_alt_val = find_best_visible_moment(start_utc, end_utc, calculator)
                 
                 if best_alt_time:
                     final_peak_utc = best_alt_time
@@ -138,9 +103,9 @@ def calculate_all_events(start_datetime_utc, end_datetime_utc, selected_events, 
                     is_optimized = True
             
             # 5. Einzelprüfungen
-            vis_start, _, _, _ = get_observability(start_utc, location_data)
-            vis_end, _, _, _ = get_observability(end_utc, location_data)
-            vis_peak_final, _, _, _ = get_observability(final_peak_utc, location_data)
+            vis_start, _, _, _ = calculator.get_observability(start_utc)
+            vis_end, _, _, _ = calculator.get_observability(end_utc)
+            vis_peak_final, _, _, _ = calculator.get_observability(final_peak_utc)
             
             # Lokalzeiten
             peak_local = final_peak_utc + timedelta(hours=offset)
