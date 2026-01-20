@@ -11,6 +11,7 @@ from . import storage
 from . import calculations
 from . import pdf
 from . import map
+from .calculation_logic import EphemCalculator
 
 class MondApp(tk.Tk):
     def __init__(self):
@@ -327,8 +328,9 @@ class MondApp(tk.Tk):
         self.config(cursor="watch")
         self.update()
         try:
+            calculator = EphemCalculator(location)
             raw_results = calculations.calculate_all_events(
-                start_dt_utc, end_dt_utc, selected_events, location
+                start_dt_utc, end_dt_utc, selected_events, location, calculator
             )
             self.current_results = raw_results
 
