@@ -1,0 +1,49 @@
+{
+    "version": "auto-py-to-exe-configuration_v1",
+    "pyinstallerOptions": [
+        {
+            "optionDest": "noconfirm",
+            "value": true
+        },
+        {
+            "optionDest": "filenames",
+            "value": "main.py"
+        },
+        {
+            "optionDest": "onefile",
+            "value": true
+        },
+        {
+            "optionDest": "console",
+            "value": false
+        },
+        {
+            "optionDest": "icon_file",
+            "value": "icon.ico"
+        },
+        {
+            "optionDest": "name",
+            "value": "MoonEvents"
+        },
+        {
+            "optionDest": "clean_build",
+            "value": true
+        },
+        {
+            "optionDest": "datas",
+            "value": "moon_map.jpg;."
+        },
+        {
+            "optionDest": "datas",
+            "value": "info.conf;."
+        },
+        {
+            "optionDest": "datas",
+            "value": "icon.ico;."
+        }
+    ],
+    "nonPyinstallerOptions": {
+        "increaseRecursionLimit": true,
+        "manualArguments": ""
+    }
+}

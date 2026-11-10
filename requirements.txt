@@ -3,3 +3,5 @@ requests
 tkcalendar
 ephem
 fpdf
+pyinstaller
+auto-py-to-exe

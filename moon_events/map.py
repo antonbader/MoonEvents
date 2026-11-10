@@ -3,12 +3,13 @@ import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk, ImageDraw
 import math
+from .utils import get_resource_path
 
 
 class MoonMap(ttk.Frame):
     def __init__(self, parent, image_path="moon_map.jpg", *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
-        self.image_path = image_path
+        self.image_path = get_resource_path(image_path)
         self.original_image = None
         self.display_image = None
         self.photo_image = None

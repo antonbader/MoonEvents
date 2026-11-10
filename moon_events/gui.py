@@ -12,6 +12,7 @@ from . import calculations
 from . import pdf
 from . import map
 from .calculation_logic import EphemCalculator
+from .utils import get_resource_path
 
 
 class MondApp(tk.Tk):
@@ -19,6 +20,13 @@ class MondApp(tk.Tk):
         super().__init__()
         self.title("MoonEvents - Mondereignis-Rechner")
         self.geometry("1400x850")
+
+        icon_path = get_resource_path("icon.ico")
+        if os.path.exists(icon_path):
+            try:
+                self.iconbitmap(icon_path)
+            except Exception:
+                pass
 
         self.app_data = storage.load_data()
         self.events_db = data.EREIGNISSE_DB
@@ -31,9 +39,10 @@ class MondApp(tk.Tk):
     def load_config(self):
         config = configparser.ConfigParser()
         defaults = {"version": "1.0", "date": "unknown"}
-        if os.path.exists("info.conf"):
+        conf_path = get_resource_path("info.conf")
+        if os.path.exists(conf_path):
             try:
-                config.read("info.conf")
+                config.read(conf_path, encoding="utf-8")
                 defaults["version"] = config["INFO"].get("version", "1.0")
                 defaults["date"] = config["INFO"].get("date", "unknown")
             except Exception:
