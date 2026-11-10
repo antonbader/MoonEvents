@@ -1,7 +1,7 @@
 # MoonEvents - Benutzerhandbuch
 
-**Version:** 1.0.0  
-**Datenbank-Version:** 3.0 (Stand: 10.11.2026)  
+**Version:** 1.1.0  
+**Datenbank-Version:** 3.1 (Stand: 10.11.2026)  
 **Autor:** Anton Bader ([https://www.anton-bader.de](https://www.anton-bader.de))  
 **Lizenz:** GNU General Public License v3.0  
 
@@ -71,8 +71,9 @@ Die genaue geografische Position des Beobachters ist entscheidend, um Auf- und U
 
 ### Aktionen
 * **Neu:** Speichert die aktuellen Eingaben als neuen Eintrag in der Liste.
+* **Speichern:** Aktualisiert den in der Liste markierten Ort mit den geänderten Eingabefeldern.
 * **Löschen:** Entfernt den in der Liste markierten Ort.
-* **Aktiv setzen:** Übernimmt den markierten Ort als Berechnungsbasis für alle nachfolgenden Suchen. Der derzeit aktive Ort wird unterhalb der Buttons dauerhaft fett angezeigt.
+* **Aktiv setzen:** Übernimmt den markierten Ort (inklusive etwaiger Änderungen in den Eingabefeldern) als Berechnungsbasis für alle nachfolgenden Suchen. Der derzeit aktive Ort wird unterhalb der Buttons dauerhaft fett angezeigt.
 
 ---
 
@@ -80,7 +81,7 @@ Die genaue geografische Position des Beobachters ist entscheidend, um Auf- und U
 
 In diesem Reiter legen Sie fest, welche Mondphänomene in die Berechnung einbezogen werden sollen.
 
-### Datenbank v3.0
+### Datenbank v3.1
 Die integrierte Datenbank umfasst **42 verifizierte Clair-obscur-Ereignisse**, die anhand moderner digitaler Mondatlanten und Ephemeriden exakt kalibriert wurden.
 
 ### Merkmale der Anzeige
@@ -136,11 +137,11 @@ Ein **Doppelklick** auf eine beliebige Zeile der Ergebnistabelle öffnet ein det
 
 * **Lokale Zeitangaben:** Exakte Start-, Optimum-, Theor.-Optimum- und Endzeitpunkte.
 * **Colongitude (Aktuell / Referenz):**
-  Zeigt die aktuelle sonnenselenografische Colongitude am Peak sowie den kalibrierten Referenzwert bei subsolarer Breite $b_0 = 0^\circ$.
+  Zeigt die aktuelle sonnenselenografische Colongitude am Beobachtungs-Optimum (sowie bei Abweichung zusätzlich am theoretischen Peak) und den kalibrierten Referenzwert bei subsolarer Breite $b_0 = 0^\circ$.
 * **Subsolare Breite ($b_0$):**
   Der aktuelle selenografische Breitengrad der Sonne. Weicht $b_0$ von 0° ab, verschiebt sich die Colongitude für das Ereignis geometrisch korrekt.
 * **Lokale Sonnenhöhe am Krater:**
-  Der effektive Höhenwinkel der Sonne über dem Horizont des Zielkraters (bei Clair-obscur-Effekten typischerweise streifend zwischen $-1^\circ$ und $+3^\circ$).
+  Der effektive Höhenwinkel der Sonne über dem Horizont des Zielkraters (am Beobachtungs-Optimum sowie ggf. am theoretischen Peak; bei Clair-obscur-Effekten typischerweise streifend zwischen $-1^\circ$ und $+4^\circ$).
 * **Selenografische Position:**
   Exakte selenografische Koordinaten (Breite und Länge) des Zielobjekts auf dem Mond.
 * **Optische Libration (Breite / Länge):**
@@ -182,8 +183,8 @@ Die Kartenansicht dient der schnellen räumlichen Orientierung auf der Mondoberf
 * **Kollisionsvermeidung für Beschriftungen:**  
   Liegen mehrere Krater eng beieinander, verschiebt ein intelligenter Layout-Algorithmus die Textlabels automatisch vertikal und zieht weiße Verbindungslinien zum jeweiligen Kraterpunkt.
 * **Dynamische Librationskorrektur:**  
-  Sobald Sie eine Berechnung durchgeführt haben, ermittelt MoonEvents die optische Libration für den Zeitpunkt des ersten beobachtbaren Ereignisses. Die Kartenbeschriftung oben rechts zeigt z. B.:
-  `Libration (15.03. 21:30): Breiten-Lib. +4.2°, Längen-Lib. -3.1°`
+  Sobald Sie eine Berechnung durchgeführt haben, ermittelt MoonEvents die optische Libration für das erste beobachtbare Ereignis – oder dynamisch für jedes Ereignis, das Sie in der Ergebnistabelle anklicken. Die Kartenbeschriftung oben rechts zeigt z. B.:
+  `Libration (Goldener Henkel, 15.03. 21:30): Breiten-Lib. +4.2°, Längen-Lib. -3.1°`
   Die orthografische Projektion passt sich an diese Libration an: Kraterpunkte wandern entsprechend der tatsächlichen perspektivischen Verkippung des Mondes zur Erde hin oder weg.
 * **Checkbox „Nur beobachtbare anzeigen“:**  
   Wird nach einer Berechnung freigeschaltet. Wenn aktiviert, zeigt die Karte ausschließlich jene Objekte, die im gewählten Zeitraum tatsächlich am Nachthimmel Ihres Standorts sichtbar sind. Nicht sichtbare Objekte werden ausgeblendet.
@@ -193,9 +194,9 @@ Die Kartenansicht dient der schnellen räumlichen Orientierung auf der Mondoberf
 ## 7. Tab: Info
 
 Hier finden Sie:
-* Die aktuelle Versionsnummer des Programms (**1.0.0**).
+* Die aktuelle Versionsnummer des Programms (**1.1.0**).
 * Das Release-Datum der aktuellen Fassung (**10.11.2026**).
-* Die Version der integrierten Ereignisdatenbank (**Daten-Version: 3.0**).
+* Die Version der integrierten Ereignisdatenbank (**Daten-Version: 3.1**).
 * Entwickler- und Support-Kontaktdaten ([info@anton-bader.de](mailto:info@anton-bader.de)) sowie einen anklickbaren Weblink zu [https://www.anton-bader.de](https://www.anton-bader.de).
 
 ---
@@ -212,9 +213,9 @@ $$\text{Colong} = (90^\circ - L_{sun}) \pmod{360^\circ}$$
 
 wobei $L_{sun}$ die selenografische Länge des Subsolarpunkts ist. Diese 1D-Näherung nimmt jedoch an, dass die Sonne exakt über dem Mondäquator steht (subsolare Breite $b_0 = 0^\circ$).
 
-In der Realität schwankt $b_0$ im Verlauf des drakonitischen Monats zwischen ca. $-1.6^\circ$ und $+1.6^\circ$. Bei hochbreitigen oder polnahen Kratern führt die Neigung der Mondachse dazu, dass die Sonne zu einem anderen Zeitpunkt den kritischen Aufgangswinkel erreicht. Bei Formationen wie dem *Lunar X* (Breite $-25^\circ$) oder dem *Barrow-Strahl* (Breite $+71^\circ$) bewirkt ein Ignorieren von $b_0$ einen **Fehler von 1,5 bis zu 3 Stunden**!
+In der Realität schwankt $b_0$ im Verlauf des drakonitischen Monats zwischen ca. $-1.6^\circ$ und $+1.6^\circ$. Bei hochbreitigen oder polnahen Kratern führt die Neigung der Mondachse dazu, dass die Sonne zu einem anderen Zeitpunkt den kritischen Aufgangswinkel erreicht. Bei Formationen wie dem *Lunar X* (Breite $-25^\circ$) oder dem polnahen *Barrow-Strahl* (Breite $+71.3^\circ$) bewirkt die Abweichung von $b_0$ eine zeitliche Verschiebung von **ca. 1,5 bis zu 9 Stunden**!
 
-MoonEvents 1.0.0 berechnet für jedes Ereignis die Ziel-Sonnenhöhe $h_{target}$ über der sphärischen Höhenformel:
+MoonEvents 1.1.0 berechnet für jedes Ereignis die Ziel-Sonnenhöhe $h_{target}$ über der sphärischen Höhenformel (wobei die hinterlegte Referenz-Colongitude als Kalibrierwert für $b_0 = 0^\circ$ definiert ist):
 
 $$\sin(h_{sun}) = \sin(\phi) \sin(b_0) + \cos(\phi) \cos(b_0) \sin(\text{Colong} + \lambda)$$
 
@@ -256,14 +257,14 @@ $$P = 1010.0 \cdot \left(1.0 - \frac{0.0065 \cdot h}{288.15}\right)^{5.255} \qua
 
 ### Intelligente Beobachtungsoptimierung
 
-Tritt das geometrisch perfekte Beleuchtungsoptimum (*Theor. Optimum*) tagsüber oder bei untergegangenem Mond ein, prüft MoonEvents das gesamte Zeitfenster des Ereignisses ($\pm \text{halbe Dauer}$):
+Tritt das geometrisch perfekte Beleuchtungsoptimum (*Theor. Optimum*) tagsüber, bei untergegangenem Mond oder bei sehr tiefem Mondstand ($< 15^\circ$) ein, prüft MoonEvents das gesamte Zeitfenster des Ereignisses ($\pm \text{halbe Dauer}$):
 
-1. Es wird in Schritten von 5 Minuten abgetastet, ob ein Teil des Zeitfensters in die Nacht fällt und der Mond über $5^\circ$ steht.
+1. Es wird in präzisen Schritten von **2 Minuten** abgetastet, ob ein Teil des Zeitfensters in die Nacht fällt und der Mond über $5^\circ$ steht.
 2. Werden mehrere sichtbare Momente gefunden, bewertet eine Scoring-Funktion den besten Kompromiss aus:
    * Geringstem Zeitabstand zum theoretischen Maximum.
    * Größter Dunkelheit (Sonnenstand möglichst tief unter $-6^\circ$).
    * Größter Mondhöhe über dem Horizont.
-3. Der gefundene Zeitpunkt wird in der Tabelle als **Optimum** ausgewiesen und mit dem Status *„Randfenster sichtbar“* gekennzeichnet.
+3. War das theoretische Maximum unsichtbar, wird der gefundene Zeitpunkt in der Tabelle als **Optimum** ausgewiesen und mit dem Status *„Randfenster sichtbar“* gekennzeichnet.
 
 ---
 
@@ -277,8 +278,8 @@ MoonEvents bestimmt das wahre synodische Mondalter exakt, indem der genaue Ephem
 
 ## 9. Häufige Fragen & Troubleshooting (FAQ)
 
-### 1. Warum weichen manche Peak-Zeiten um bis zu 2 Stunden von älteren Mondtabellen ab?
-Ältere Verzeichnisse verwendeten meist eine statische 1D-Colongitude bei $b_0=0^\circ$. MoonEvents 1.0.0 berücksichtigt die reale subsolare Breite $b_0$. Für Krater abseits des Mondäquators ist die von MoonEvents berechnete Zeit der tatsächliche physikalische Moment des Lichteinfalls.
+### 1. Warum weichen manche Peak-Zeiten um mehrere Stunden von älteren Mondtabellen ab?
+Ältere Verzeichnisse verwendeten meist eine statische 1D-Colongitude bei $b_0=0^\circ$. MoonEvents 1.1.0 berücksichtigt die reale subsolare Breite $b_0$. Für Krater abseits des Mondäquators ist die von MoonEvents berechnete Zeit der tatsächliche physikalische Moment, in dem die Referenz-Sonnenhöhe erreicht wird.
 
 ### 2. Was bedeutet der Status „Randfenster sichtbar“?
 Das theoretische Maximum findet statt, während der Mond an Ihrem Standort noch unter dem Horizont steht oder die Sonne noch scheint. Doch vor Ende des Beleuchtungsfensters geht der Mond auf (oder es wird dunkel), sodass Sie das Phänomen noch in seiner Endphase beobachten können.

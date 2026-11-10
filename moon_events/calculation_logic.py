@@ -93,6 +93,8 @@ class EphemCalculator:
 
         if center_dist_deg >= 89.0:
             lib_status = "Hinter Mondrand (unsichtbar)"
+        elif center_dist_deg >= 82.0:
+            lib_status = f"Extrem randnah ({lib_gain_deg:+.1f}° Libration)"
         elif center_dist_0_deg >= 45.0:
             if lib_gain_deg >= 1.5:
                 lib_status = f"Günstig (+{lib_gain_deg:.1f}° vom Rand)"

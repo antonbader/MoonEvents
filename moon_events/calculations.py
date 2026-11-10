@@ -153,8 +153,11 @@ def local_to_utc(dt_local: datetime, location_data: dict) -> datetime:
 def get_timezone_label(location_data: dict) -> str:
     offset = location_data.get("timezone_offset", 1)
     auto_dst = location_data.get("auto_dst", True)
-    if auto_dst and offset == 1:
+    tz_name = location_data.get("timezone")
+    if auto_dst and offset == 1 and (not tz_name or tz_name == "Europe/Berlin"):
         return "MEZ/MESZ (automatisch)"
+    if auto_dst and tz_name:
+        return f"{tz_name} (automatisch)"
     if offset >= 0:
         return f"UTC+{offset}"
     return f"UTC{offset}"
@@ -235,23 +238,28 @@ def calculate_all_events(start_datetime_utc, end_datetime_utc, selected_events, 
             final_alt = m_alt_peak
             is_optimized = False
 
-            # 3. Optimum im Ereignisfenster suchen, falls theoretischer Peak nicht sichtbar ist
-            if not vis_peak_theo:
+            # 3. Optimum im Ereignisfenster suchen (wenn theor. Peak unsichtbar ist oder Mond dort sehr tief steht)
+            if not vis_peak_theo or m_alt_peak < 15.0:
                 best_alt_time, best_alt_val = find_best_visible_moment(
                     start_utc, end_utc, calculator, theo_peak_utc=theo_peak_utc
                 )
 
                 if best_alt_time is not None:
-                    final_peak_utc = best_alt_time
-                    final_alt = best_alt_val
-                    is_optimized = True
+                    if not vis_peak_theo:
+                        final_peak_utc = best_alt_time
+                        final_alt = best_alt_val
+                        is_optimized = True
+                    elif (best_alt_val - m_alt_peak) >= 8.0 and abs((best_alt_time - theo_peak_utc).total_seconds()) >= 300:
+                        final_peak_utc = best_alt_time
+                        final_alt = best_alt_val
 
-            # 4. Einzelprüfungen & Libration
+            # 4. Einzelprüfungen & Libration (sowohl für Beobachtungs-Optimum als auch für theoretischen Peak)
             vis_start, _, _, _ = calculator.get_observability(start_utc)
             vis_end, _, _, _ = calculator.get_observability(end_utc)
             vis_peak_final, _, _, _ = calculator.get_observability(final_peak_utc)
 
             lib_info = calculator.get_libration_and_lighting(final_peak_utc, ev_lat, ev_lon)
+            theo_lib_info = calculator.get_libration_and_lighting(theo_peak_utc, ev_lat, ev_lon)
             limb_ok = lib_info["center_dist_deg"] < 89.0
 
             if not limb_ok:
@@ -292,8 +300,11 @@ def calculate_all_events(start_datetime_utc, end_datetime_utc, selected_events, 
                 "status_text": final_status,
                 "moon_alt": final_alt,
                 "colong_actual": lib_info["colong"],
+                "colong_theo": theo_lib_info["colong"],
                 "subsolar_lat": lib_info["subsolar_lat"],
+                "subsolar_lat_theo": theo_lib_info["subsolar_lat"],
                 "solar_alt": lib_info["solar_alt"],
+                "solar_alt_theo": theo_lib_info["solar_alt"],
                 "lib_lat": lib_info["lib_lat"],
                 "lib_lon": lib_info["lib_lon"],
                 "center_dist_deg": lib_info["center_dist_deg"],

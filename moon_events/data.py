@@ -6,10 +6,10 @@ Die Colongitude (Sonnenselenografische Länge) ist der Referenzwert für b0 = 0�
 und wird bei der Berechnung dynamisch über die subsolare Breite b0 korrigiert.
 
 Kalibrierung: Stand 2026 (Referenzwerte astronomisch verifiziert)
-Version: 3.0 - Korrigierte Ephemeriden-Referenzwerte & Koordinaten
+Version: 3.1 - Korrigierte Ephemeriden-Referenzwerte, Koordinaten & Beschreibungen
 """
 
-DB_VERSION = "3.0"
+DB_VERSION = "3.1"
 
 EREIGNISSE_DB = [
     # --- ZUNEHMENDER MOND (Tag 0 bis ca. 14) ---
@@ -31,16 +31,16 @@ EREIGNISSE_DB = [
         "phase": "Zunehmend",
         "difficulty": "Mittel",
         "difficulty_tip": "Hängt stark vom persönlichen Eindruck ab, die Kaps sind aber leicht zu finden.",
-        "lat": 16.8, "lon": 22.0
+        "lat": 16.7, "lon": 21.0
     },
     {
         "name": "Larrieus Staudamm",
-        "colong": 343.0,
+        "colong": 335.5,
         "duration_min": 180,
-        "desc": "Kleine, beleuchtete Erhebung im Krater Polybius K, die wie eine Staumauer wirkt (kurz vor Erstes Viertel).",
+        "desc": "Kleine, beleuchtete Erhebung beim Krater Polybius K, die beim Sonnenaufgang wie eine gerade Staumauer wirkt.",
         "phase": "Zunehmend",
         "difficulty": "Mittel",
-        "difficulty_tip": "Kleine, aber markant durch die gerade Linie. Erfordert gutes Timing.",
+        "difficulty_tip": "Klein, aber markant durch die gerade Linie am Terminator. Erfordert gutes Timing.",
         "lat": -24.5, "lon": 25.5
     },
     {
@@ -60,8 +60,8 @@ EREIGNISSE_DB = [
         "desc": "Ein schmaler Sonnenlichtstrahl fällt durch eine Lücke im westlichen Kraterwall von Barrow (Polregion).",
         "phase": "Zunehmend",
         "difficulty": "Schwer",
-        "difficulty_tip": "Sehr kurzes Zeitfenster (90 min) und ungünstige Lage am Pol (Libration beachten).",
-        "lat": 71.3, "lon": 10.0
+        "difficulty_tip": "Sehr kurzes Zeitfenster (90 min) und polnahe Lage (starke Abhängigkeit von b0 und Libration).",
+        "lat": 71.3, "lon": 7.7
     },
     {
         "name": "Lunar X (Werner X)",
@@ -95,12 +95,12 @@ EREIGNISSE_DB = [
     },
     {
         "name": "Gesicht in Albategnius",
-        "colong": 3.5,
+        "colong": 358.0,
         "duration_min": 120,
-        "desc": "Der Schatten des Zentralbergs im Krater Albategnius formt beim Sonnenaufgang ein markantes menschliches Profil.",
+        "desc": "Der lange Schatten des Zentralbergs im Krater Albategnius formt beim Sonnenaufgang ein markantes menschliches Profil.",
         "phase": "Zunehmend",
         "difficulty": "Mittel",
-        "difficulty_tip": "Schattenspiel; erfordert etwas Fantasie ('Pareidolie').",
+        "difficulty_tip": "Schattenspiel kurz nach Sonnenaufgang im Krater; erfordert etwas Fantasie ('Pareidolie').",
         "lat": -11.2, "lon": 4.0
     },
     {
@@ -211,7 +211,7 @@ EREIGNISSE_DB = [
         "phase": "Zunehmend",
         "difficulty": "Mittel",
         "difficulty_tip": "Profil ist gut erkennbar, wenn man weiß, wo man am Kap Heraclides schauen muss.",
-        "lat": 40.7, "lon": -33.2
+        "lat": 40.3, "lon": -33.2
     },
     {
         "name": "Schröters Tal Sonnenaufgang",
@@ -237,10 +237,10 @@ EREIGNISSE_DB = [
         "name": "Aristarchus-Strahlen",
         "colong": 57.0,
         "duration_min": 360,
-        "desc": "Der hellste Krater des Mondes zeigt seine spektakulären Strahlensysteme bei schrägem Lichteinfall besonders eindrucksvoll.",
+        "desc": "Der hellste Krater des Mondes tritt nach Sonnenaufgang mit seinen Kraterterrassen, dem Zentralberg und ersten hellen Auswurfstrukturen extrem kontrastreich hervor.",
         "phase": "Zunehmend",
         "difficulty": "Leicht",
-        "difficulty_tip": "Hellster Fleck auf dem Mond, kaum zu übersehen.",
+        "difficulty_tip": "Hellster Fleck auf dem Mond; Terrassen und Kraterwall bei schrägem Morgenlicht besonders plastisch.",
         "lat": 23.7, "lon": -47.4
     },
 
@@ -257,29 +257,29 @@ EREIGNISSE_DB = [
     },
     {
         "name": "O'Neills Brücke",
-        "colong": 122.5,
+        "colong": 128.5,
         "duration_min": 120,
-        "desc": "Zwischen Kap Promontorium Olivium und Lavinium. Ein Schattenspiel täuschte früher Astronomen eine künstliche Brücke vor.",
+        "desc": "Zwischen Kap Promontorium Olivium und Lavinium am Westrand des Mare Crisium. Ein Licht- und Schattenspiel täuschte 1953 eine künstliche Brücke vor.",
         "phase": "Abnehmend",
         "difficulty": "Schwer",
-        "difficulty_tip": "Eine Illusion, die oft schwer nachzuvollziehen ist. Historisch interessant.",
-        "lat": 15.0, "lon": 58.0
+        "difficulty_tip": "Berühmte optische Illusion am Westrand des Mare Crisium (südöstlich von Proclus).",
+        "lat": 14.5, "lon": 49.3
     },
     {
         "name": "Messier-Zwillinge",
         "colong": 129.0,
         "duration_min": 180,
-        "desc": "Die beiden ovalen Krater Messier und Messier A mit ihren asymmetrischen Strahlensystemen beim Sonnenuntergang.",
+        "desc": "Die beiden ovalen Krater Messier und Messier A zeigen beim Sonnenuntergang dramatische innere Schattenwürfe sowie ihre zwei kometenschweifartigen Lichtstreifen.",
         "phase": "Abnehmend",
         "difficulty": "Mittel",
-        "difficulty_tip": "Die 'Kometenschweif'-Form ist markant, Krater sind aber klein.",
+        "difficulty_tip": "Die längliche Kraterform mit Schattenwurf und 'Kometenschweif' ist markant, die Krater sind aber klein.",
         "lat": -1.9, "lon": 47.6
     },
     {
         "name": "Taruntius-Terrassierung",
         "colong": 132.0,
         "duration_min": 240,
-        "desc": "Die konzentrische Terrassenstruktur im Krater Taruntius wird bei niedrigem Sonnenstand spektakulär sichtbar.",
+        "desc": "Die konzentrische Doppelwand- und Terrassenstruktur im Krater Taruntius wird bei niedrigem Sonnenstand spektakulär sichtbar.",
         "phase": "Abnehmend",
         "difficulty": "Schwer",
         "difficulty_tip": "Konzentrische Ringe brauchen sehr flaches Licht und gutes Seeing.",
@@ -289,20 +289,20 @@ EREIGNISSE_DB = [
         "name": "Atlas-Kratergruben",
         "colong": 132.5,
         "duration_min": 150,
-        "desc": "Die mysteriösen dunklen Flecken im Kraterboden von Atlas werden bei schrägem Licht als Vertiefungen erkennbar.",
+        "desc": "Im Kraterboden von Atlas treten bei streifendem Abendlicht die Senken der dunklen Kratergruben und das feine Rillensystem (Rimae Atlas) plastisch hervor.",
         "phase": "Abnehmend",
         "difficulty": "Schwer",
-        "difficulty_tip": "Details im Kraterboden brauchen hohe Vergrößerung.",
+        "difficulty_tip": "Feine Bodenstrukturen und Rillen brauchen hohe Vergrößerung und ruhige Luft.",
         "lat": 46.7, "lon": 44.4
     },
     {
         "name": "Proclus Asymmetrie",
         "colong": 133.0,
         "duration_min": 180,
-        "desc": "Der junge Krater Proclus zeigt sein asymmetrisches Strahlensystem beim Sonnenuntergang besonders deutlich.",
+        "desc": "Am jungen, polygonalen Krater Proclus versinkt der steile Kraterboden im Abendschatten, während die asymmetrische Auswurfzone und der Westwall noch hell leuchten.",
         "phase": "Abnehmend",
         "difficulty": "Leicht",
-        "difficulty_tip": "Sehr helles Strahlensystem, auffällige 'Sperrzone' im Muster.",
+        "difficulty_tip": "Extrem heller Kraterwall am Terminator mit markanter 'Sperrzone' Richtung Palus Somni.",
         "lat": 16.1, "lon": 46.8
     },
     {
@@ -367,22 +367,22 @@ EREIGNISSE_DB = [
     },
     {
         "name": "Eratosthenes letzter Schatten",
-        "colong": 191.8,
+        "colong": 190.8,
         "duration_min": 180,
-        "desc": "Der Krater Eratosthenes wirft beim Sonnenuntergang einen langen Schatten über das Mare Imbrium.",
+        "desc": "Der Krater Eratosthenes füllt sich beim Sonnenuntergang mit tiefem Schatten und wirft einen langen Schattenwurf in die Umgebung.",
         "phase": "Abnehmend",
         "difficulty": "Leicht",
-        "difficulty_tip": "Sehr langes Zeitfenster, Schattenwurf ist dramatisch.",
+        "difficulty_tip": "Sehr langes Zeitfenster, Schattenwurf kurz vor Sonnenuntergang am Krater ist dramatisch.",
         "lat": 14.5, "lon": -11.3
     },
     {
         "name": "Curtiss-Kreuz",
-        "colong": 193.5,
+        "colong": 193.8,
         "duration_min": 120,
-        "desc": "Die Wälle des kleinen Kraters Fra Mauro Zeta bilden beim abnehmenden Mond ein leuchtendes Kreuz.",
+        "desc": "Die hochgelegenen Wälle nahe Fra Mauro Zeta (zwischen Parry und Gambart) bilden beim Sonnenuntergang ein leuchtendes Kreuz im dunklen Umfeld.",
         "phase": "Abnehmend",
         "difficulty": "Schwer",
-        "difficulty_tip": "Sehr klein, man muss genau wissen, wo man sucht.",
+        "difficulty_tip": "Sehr klein, man muss genau wissen, wo man sucht (Gegenstück zum Lunar X am Abendterminator).",
         "lat": -3.7, "lon": -17.0
     },
     {
@@ -403,7 +403,7 @@ EREIGNISSE_DB = [
         "phase": "Abnehmend",
         "difficulty": "Mittel",
         "difficulty_tip": "Ähnlich wie am Morgen, Profil verschwindet langsam.",
-        "lat": 40.7, "lon": -33.2
+        "lat": 40.3, "lon": -33.2
     },
     {
         "name": "Inverser Goldener Henkel",

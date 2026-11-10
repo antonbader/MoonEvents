@@ -1,7 +1,7 @@
 Pillow
-requests
 tkcalendar
 ephem
 fpdf
+tzdata
 pyinstaller
 auto-py-to-exe

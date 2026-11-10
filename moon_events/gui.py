@@ -178,6 +178,7 @@ class MondApp(tk.Tk):
         btn_frame = ttk.Frame(detail_frame)
         btn_frame.grid(row=6, column=0, columnspan=2, pady=20)
         ttk.Button(btn_frame, text="Neu", command=self.add_location).pack(side='left', padx=2)
+        ttk.Button(btn_frame, text="Speichern", command=self.update_location).pack(side='left', padx=2)
         ttk.Button(btn_frame, text="Löschen", command=self.delete_location).pack(side='left', padx=2)
         ttk.Button(btn_frame, text="Aktiv setzen", command=self.set_active_location).pack(side='left', padx=2)
         self.lbl_active_loc = ttk.Label(detail_frame, text="Aktiver Ort: -", font=('Arial', 10, 'bold'))
@@ -196,6 +197,7 @@ class MondApp(tk.Tk):
         sel = self.loc_listbox.curselection()
         if not sel:
             return
+        self.selected_edit_loc_idx = sel[0]
         loc = self.app_data['locations'][sel[0]]
         self.entry_name.delete(0, tk.END)
         self.entry_name.insert(0, loc['name'])
@@ -209,18 +211,41 @@ class MondApp(tk.Tk):
         self.entry_offset.insert(0, str(loc.get('timezone_offset', 1)))
         self.var_auto_dst.set(loc.get('auto_dst', True))
 
+    def _read_location_entries(self):
+        name = self.entry_name.get().strip()
+        if not name:
+            raise ValueError("Name darf nicht leer sein.")
+        return {
+            "name": name,
+            "lat": float(self.entry_lat.get()),
+            "lon": float(self.entry_lon.get()),
+            "elevation": float(self.entry_elev.get()),
+            "timezone_offset": int(self.entry_offset.get()),
+            "auto_dst": bool(self.var_auto_dst.get()),
+        }
+
     def add_location(self):
         try:
-            new_loc = {
-                "name": self.entry_name.get(),
-                "lat": float(self.entry_lat.get()),
-                "lon": float(self.entry_lon.get()),
-                "elevation": float(self.entry_elev.get()),
-                "timezone_offset": int(self.entry_offset.get()),
-                "auto_dst": bool(self.var_auto_dst.get()),
-            }
+            new_loc = self._read_location_entries()
             self.app_data['locations'].append(new_loc)
+            self.selected_edit_loc_idx = len(self.app_data['locations']) - 1
             self.refresh_loc_list()
+            self.loc_listbox.selection_set(self.selected_edit_loc_idx)
+            storage.save_data(self.app_data)
+        except Exception:
+            messagebox.showerror("Fehler", "Eingabe prüfen.")
+
+    def update_location(self):
+        sel = self.loc_listbox.curselection()
+        idx = sel[0] if sel else getattr(self, 'selected_edit_loc_idx', None)
+        if idx is None or not (0 <= idx < len(self.app_data['locations'])):
+            messagebox.showinfo("Hinweis", "Bitte zuerst einen Ort in der Liste auswählen.")
+            return
+        try:
+            updated_loc = self._read_location_entries()
+            self.app_data['locations'][idx].update(updated_loc)
+            self.refresh_loc_list()
+            self.loc_listbox.selection_set(idx)
             storage.save_data(self.app_data)
         except Exception:
             messagebox.showerror("Fehler", "Eingabe prüfen.")
@@ -231,17 +256,24 @@ class MondApp(tk.Tk):
             return
         del self.app_data['locations'][sel[0]]
         self.app_data['selected_location_index'] = 0
+        self.selected_edit_loc_idx = 0
         self.refresh_loc_list()
         storage.save_data(self.app_data)
 
     def set_active_location(self):
         sel = self.loc_listbox.curselection()
-        if not sel:
+        idx = sel[0] if sel else getattr(self, 'selected_edit_loc_idx', None)
+        if idx is None or not (0 <= idx < len(self.app_data['locations'])):
             return
-        loc = self.app_data['locations'][sel[0]]
-        loc['auto_dst'] = bool(self.var_auto_dst.get())
-        self.app_data['selected_location_index'] = sel[0]
+        try:
+            if self.entry_name.get().strip():
+                updated_loc = self._read_location_entries()
+                self.app_data['locations'][idx].update(updated_loc)
+        except Exception:
+            self.app_data['locations'][idx]['auto_dst'] = bool(self.var_auto_dst.get())
+        self.app_data['selected_location_index'] = idx
         self.refresh_loc_list()
+        self.loc_listbox.selection_set(idx)
         storage.save_data(self.app_data)
 
     # --- TAB 2: EREIGNISSE ---
@@ -337,6 +369,7 @@ class MondApp(tk.Tk):
         scrollbar.pack(side='right', fill='y')
 
         self.tree.bind("<Double-1>", self.on_tree_double_click)
+        self.tree.bind("<<TreeviewSelect>>", self.on_tree_select)
 
         self.tree.heading('Ereignis', text='Ereignis')
         self.tree.heading('Start', text='Start')
@@ -398,19 +431,35 @@ class MondApp(tk.Tk):
 
             # Aktualisiere Libration für die Kartenprojektion anhand des ersten sichtbaren (oder ersten) Ergebnisses
             ref_rows = [r for r in raw_results if r['visible']] or raw_results
-            if ref_rows and hasattr(self, 'map_widget'):
-                r0 = ref_rows[0]
-                lib_b = r0.get('lib_lat', 0.0)
-                lib_l = r0.get('lib_lon', 0.0)
-                self.map_widget.set_libration(lib_b, lib_l)
-                if hasattr(self, 'lbl_map_libration'):
-                    self.lbl_map_libration.config(
-                        text=f"Libration ({r0['peak_local'].strftime('%d.%m. %H:%M')}): Breiten-Lib. {lib_b:+.1f}°, Längen-Lib. {lib_l:+.1f}°"
-                    )
+            if ref_rows:
+                self._apply_result_libration_to_map(ref_rows[0])
 
             self.update_tree_display()
         finally:
             self.config(cursor="")
+
+    def _apply_result_libration_to_map(self, res_row):
+        if hasattr(self, 'map_widget') and res_row:
+            lib_b = res_row.get('lib_lat', 0.0)
+            lib_l = res_row.get('lib_lon', 0.0)
+            self.map_widget.set_libration(lib_b, lib_l)
+            if hasattr(self, 'lbl_map_libration'):
+                ev_name = res_row['event']['name']
+                self.lbl_map_libration.config(
+                    text=f"Libration ({ev_name}, {res_row['peak_local'].strftime('%d.%m. %H:%M')}): Breiten-Lib. {lib_b:+.1f}°, Längen-Lib. {lib_l:+.1f}°"
+                )
+
+    def on_tree_select(self, event):
+        sel = self.tree.selection()
+        if not sel:
+            return
+        children = self.tree.get_children()
+        try:
+            index = children.index(sel[0])
+            if 0 <= index < len(self.filtered_results):
+                self._apply_result_libration_to_map(self.filtered_results[index])
+        except ValueError:
+            pass
 
     def update_tree_display(self):
         self.tree.delete(*self.tree.get_children())
@@ -518,8 +567,10 @@ class MondApp(tk.Tk):
 
         colong_ref = result['event'].get('colong', 0.0)
         colong_act = result.get('colong_actual', colong_ref)
+        colong_theo = result.get('colong_theo', colong_act)
         b0_deg = result.get('subsolar_lat', 0.0)
         solar_alt = result.get('solar_alt', 0.0)
+        solar_alt_theo = result.get('solar_alt_theo', solar_alt)
         dur = result['event'].get('duration_min', 0)
         lat = result['event'].get('lat', 0.0)
         lon = result['event'].get('lon', 0.0)
@@ -530,10 +581,17 @@ class MondApp(tk.Tk):
         age_exact = result.get('moon_age_exact', calculations.calculate_moon_age_approx(colong_act))
         phase_text = calculations.get_phase_description(age_exact)
 
+        if abs(colong_act - colong_theo) > 0.02:
+            colong_str = f"{colong_act:.2f}° am Opt. / {colong_theo:.2f}° am Theor. Peak (Ref. b0=0°: {colong_ref:.1f}°)"
+            solar_str = f"{solar_alt:+.2f}° am Opt. ({solar_alt_theo:+.2f}° am Theor. Peak)"
+        else:
+            colong_str = f"{colong_act:.2f}° (Ref. bei b0=0°: {colong_ref:.1f}°)"
+            solar_str = f"{solar_alt:+.2f}°"
+
         astro_rows = [
-            ("Colongitude (Aktuell / Ref.):", f"{colong_act:.2f}° (Ref. bei b0=0°: {colong_ref:.1f}°)"),
+            ("Colongitude (Aktuell / Ref.):", colong_str),
             ("Subsolare Breite b0:", f"{b0_deg:+.2f}°"),
-            ("Lokale Sonnenhöhe am Krater:", f"{solar_alt:+.2f}°"),
+            ("Lokale Sonnenhöhe am Krater:", solar_str),
             ("Selenogr. Position:", f"Lat {lat:+.1f}°, Lon {lon:+.1f}°"),
             ("Libration (Breite / Länge):", f"b = {lib_lat:+.2f}°, l = {lib_lon:+.2f}°"),
             ("Randabstand & Bewertung:", f"{center_dist:.1f}° von Scheibenmitte ({lib_status})"),

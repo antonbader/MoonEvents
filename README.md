@@ -1,7 +1,7 @@
 # MoonEvents - Mondereignis-Rechner & Beobachtungsplaner
 
-[![Version](https://img.shields.io/badge/Version-1.0.0-blue.svg)](file:///c:/Users/info/Documents/GitHub/Mond_Rechner/MoonEvents/info.conf)
-[![Database](https://img.shields.io/badge/Daten--Version-3.0-green.svg)](file:///c:/Users/info/Documents/GitHub/Mond_Rechner/MoonEvents/moon_events/data.py)
+[![Version](https://img.shields.io/badge/Version-1.1.0-blue.svg)](file:///c:/Users/info/Documents/GitHub/Mond_Rechner/MoonEvents/info.conf)
+[![Database](https://img.shields.io/badge/Daten--Version-3.1-green.svg)](file:///c:/Users/info/Documents/GitHub/Mond_Rechner/MoonEvents/moon_events/data.py)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-orange.svg)](file:///c:/Users/info/Documents/GitHub/Mond_Rechner/MoonEvents/LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/)
 
@@ -21,12 +21,12 @@ Die Software ermittelt für beliebige Erdstandorte die exakten Zeitpunkte optima
   Ein Ereignis wird nur als sichtbar eingestuft, wenn die bürgerliche Dämmerung beendet ist (Sonnenhöhe $\le -6^\circ$) und der Mond ausreichend hoch über dem Horizont steht ($\ge 5^\circ$). Die atmosphärische Refraktion wird über die barometrische Höhenformel an die Geländehöhe des Beobachtungsorts angepasst.
 * **Intelligente Beobachtungsoptimierung:**
   Ist das theoretische geometrische Maximum von Ihrem Standort aus unsichtbar (z. B. am Taghimmel oder unter dem Horizont), prüft das System das gesamte Sichtbarkeitsfenster des Ereignisses und ermittelt das beste beobachtbare Teilfenster.
-* **Umfangreiche Ereignisdatenbank (v3.0):**
+* **Umfangreiche Ereignisdatenbank (v3.1):**
   Enthält 42 astronomisch verifizierte Mondereignisse für zunehmenden und abnehmenden Mond, gegliedert nach Schwierigkeitsgrad (*Leicht*, *Mittel*, *Schwer*) inklusive spezifischer Beobachtungstipps für Teleskop- und Instrumentenwahl.
 * **Automatische Zeitzonen- & Sommerzeitunterstützung (MEZ/MESZ):**
-  Automatische Umschaltung zwischen Winterzeit (Normalzeit) und Sommerzeit über das Python-Modul `zoneinfo`.
+  Automatische Umschaltung zwischen Winterzeit (Normalzeit) und Sommerzeit über das Python-Modul `zoneinfo` (`tzdata`).
 * **Interaktive Mondkarte mit Libration:**
-  Orthografische 2D-Projektion der ausgewählten Ereignisse auf den Mondglobus. Bei vorliegender Berechnung passt sich die Projektion dynamisch an die reale Libration des Ereigniszeitpunkts an. Intelligente Textplatzierung verhindert Überlappungen von Beschriftungen.
+  Orthografische 2D-Projektion der ausgewählten Ereignisse auf den Mondglobus. Bei vorliegender Berechnung passt sich die Projektion dynamisch an die reale Libration des ausgewählten Ereigniszeitpunkts an. Intelligente Textplatzierung verhindert Überlappungen von Beschriftungen.
 * **Detaillierte Analyseansicht:**
   Doppelklick auf ein Berechnungsergebnis öffnet ein Detailfenster mit genauen lokalen Zeiten, subsolarer Breite $b_0$, lokaler Sonnenhöhe am Krater, Randdistanz, Librationswerten, wahrem synodischem Mondalter und Beobachtungshinweisen.
 * **Druckfertiger, moderner PDF-Export (A4 Querformat):**
@@ -56,7 +56,7 @@ MoonEvents/
     ├── __init__.py
     ├── calculations.py         # Intervallsuche, Newton-Verfahren, Zeitumrechnung
     ├── calculation_logic.py    # EphemCalculator: Refraktion, 2D-Sonnengleichung, Libration
-    ├── data.py                 # EREIGNISSE_DB (v3.0, 42 Ereignisse, Koordinaten, Tipps)
+    ├── data.py                 # EREIGNISSE_DB (v3.1, 42 Ereignisse, Koordinaten, Tipps)
     ├── gui.py                  # Tkinter-Benutzeroberfläche (Tabs für Orte, Ereignisse, etc.)
     ├── map.py                  # MoonMap: Orthografische Projektion & Kollisionsvermeidung
     ├── pdf.py                  # PDFReport: A4-Querformat-Export mit fpdf
@@ -95,6 +95,7 @@ Die Kernbibliotheken umfassen:
 * `Pillow`: Laden und Rendern der Mondkarte
 * `tkcalendar`: Komfortable Datumsauswahl in der Benutzeroberfläche
 * `fpdf`: Generierung druckfertiger PDF-Dokumente
+* `tzdata`: Aktuelle IANA-Zeitzonendatenbank für automatische Sommer-/Winterzeit
 * `pyinstaller` / `auto-py-to-exe`: Erstellung der eigenständigen Windows-Executable
 
 ---
