@@ -161,11 +161,14 @@ Ein **Doppelklick** auf eine beliebige Zeile der Ergebnistabelle öffnet ein det
 
 Über die Schaltfläche **„PDF Export“** können Sie Ihre Berechnungen als professionelles Dokument im DIN-A4-Querformat speichern:
 
-* **Kompakter Beobachtungsplan:** Enthält alle Spalten der Ergebnistabelle inklusive Schwierigkeitsgrad und Beschreibung.
-* **Farbcodierte Zeitfelder:** Zeiten, zu denen das Phänomen von Ihrem Standort aus tatsächlich sichtbar ist (Mond $\ge 5^\circ$, Sonne $\le -6^\circ$), werden grün hinterlegt.
+* **Modernes & klares Tabellenlayout:** Gestaltet im dunklen Schieferblau (`#1E293B`) mit dezenten, hellgrauen Zellbegrenzungen und alternierender Zebra-Schattierung für ermüdungsfreies Ablesen bei Nacht.
+* **Strukturierte Metadaten-Infobox:** Seite 1 enthält eine übersichtliche Kopfkarte mit *Standort*, *Berechnungszeitraum*, *Zeitzone* sowie einer statistischen Gesamt- und Sichtbarkeitsübersicht (sichtbare Phänomene grün hervorgehoben).
+* **Automatischer, spaltengenauer Zeilenumbruch:** Alle Spalten – insbesondere auch längere Ereignisnamen (z. B. *„Der Kuss (Promontorium Acherusia)“* oder *„Maginus-Sonnenaufgangsstrahl“*), Sichtbarkeitskriterien und Beschreibungen – werden dynamisch umbrochen, sodass kein Text über Spaltenbegrenzungen hinausragt. Die Zeilenhöhe passt sich flexibel an den längsten Spalteninhalt an.
+* **Farbcodierte Zeitfelder & Status:** Zeitpunkte, zu denen das Phänomen von Ihrem Standort aus tatsächlich sichtbar ist (Mond $\ge 5^\circ$, Sonne $\le -6^\circ$), sind in kräftigem Smaragdgrün hervorgehoben; nicht sichtbare Zeiten werden in dezentem Grau dargestellt.
+* **Farblich akzentuierte Schwierigkeitsgrade:** Übersichtliche visuelle Unterscheidung nach Beobachtungsanforderung (*Leicht / Sehr Leicht* in Grün, *Mittel* in Bernstein/Orange, *Schwer / Sehr Schwer* in Rot).
 * **Mondhöhe:** Bei sichtbaren Ereignissen wird die genaue Höhe des Mondes über dem Horizont beim Optimum in Grad ausgewiesen (z. B. `Gut beobachtbar (Alt: 42.3°)`).
-* **Kopf- und Fußzeilen:** Enthalten den gewählten Standort, die aktive Zeitzone (z. B. `MEZ/MESZ`), das Berechnungsdatum, den Suchzeitraum sowie Seitenzahlen.
-* **Automatische Zeichensatzbereinigung:** Sonderzeichen (z. B. griechische Buchstaben $\alpha, \beta$ oder typografische Anführungszeichen) werden automatisch für das PDF-Format aufbereitet.
+* **Kopf- und Fußzeilen:** Folgeseiten besitzen eine kompakte Kopfzeile mit Standort, Zeitraum und Zeitzone; die Fußzeile weist das Erstellungsdatum, Webadresse und eine genaue Paginierung (`Seite X von Y`) aus.
+* **Automatische Zeichensatzbereinigung:** Sonderzeichen (z. B. griechische Buchstaben $\alpha, \beta, \gamma, \delta$, typografische Anführungszeichen, Gedankenstriche und mathematische Symbole) werden zuverlässig aufbereitet.
 
 ---
 
@@ -286,5 +289,5 @@ Das Phänomen liegt geografisch nahe am Mondrand. Durch ungünstige optische Lib
 ### 4. Wo speichert MoonEvents meine Daten?
 Alle Einstellungen werden in der Datei `mond_einstellungen.json` im Programmverzeichnis gespeichert. Wenn Sie die Anwendung als kompilierte `.exe` nutzen, wird diese Datei automatisch neben der ausführbaren Datei abgelegt.
 
-### 5. Wie kann ich die Schriftgröße im PDF anpassen?
-Der PDF-Export ist für standardmäßige DIN-A4-Querformat-Drucke optimiert. Bei sehr langen Notizen bricht die Spalte „Beschreibung“ automatisch um; bei Überschreiten der Seitenhöhe wird automatisch eine Folgeseite mit wiederholter Kopfzeile generiert.
+### 5. Wie verhält sich das PDF bei langen Texten und Ereignisnamen?
+Das PDF-Layout ist dynamisch aufgebaut: Wenn ein Ereignisname, ein Sichtbarkeitsstatus oder ein Beschreibungstext länger als die verfügbare Spaltenbreite ist, wird der Text automatisch an Wort-, Binde- oder Schrägstrichgrenzen in mehrere Zeilen umgebrochen. Die Zeilenhöhe passt sich dabei exakt an den Inhalt an, sodass benachbarte Zellen weder überdeckt noch abgeschnitten werden. Bei Überschreiten der Seitenhöhe wird automatisch eine Folgeseite mit kompakter Kopfzeile und wiederholtem Spaltenkopf erzeugt.

@@ -29,8 +29,8 @@ Die Software ermittelt für beliebige Erdstandorte die exakten Zeitpunkte optima
   Orthografische 2D-Projektion der ausgewählten Ereignisse auf den Mondglobus. Bei vorliegender Berechnung passt sich die Projektion dynamisch an die reale Libration des Ereigniszeitpunkts an. Intelligente Textplatzierung verhindert Überlappungen von Beschriftungen.
 * **Detaillierte Analyseansicht:**
   Doppelklick auf ein Berechnungsergebnis öffnet ein Detailfenster mit genauen lokalen Zeiten, subsolarer Breite $b_0$, lokaler Sonnenhöhe am Krater, Randdistanz, Librationswerten, wahrem synodischem Mondalter und Beobachtungshinweisen.
-* **Druckfertiger PDF-Export (A4 Querformat):**
-  Exportiert übersichtliche Beobachtungstabellen für den Feldeinsatz mit farbiger Kennzeichnung beobachtbarer Phasen, Mondhöhen, Schwierigkeitsgraden und bereinigtem Zeichensatz.
+* **Druckfertiger, moderner PDF-Export (A4 Querformat):**
+  Exportiert ansprechende Beobachtungstabellen für den Feldeinsatz mit strukturierter Metadaten-Infobox, dezenter Zebra-Streifung, automatischem Zeilenumbruch für alle Spalten (inklusive langer Ereignisnamen), farblich differenzierten Sichtbarkeitszeiten, Schwierigkeitsgraden, Mondhöhen und robuster Zeichensatzbereinigung.
 * **Windows One-Click Standalone-Build:**
   Vorkonfigurierte Skripte (`build_exe.bat` und `start_auto_py_to_exe.bat`) zur schnellen Kompilierung in eine eigenständige, portable Windows-Anwendung ohne Python-Installationspflicht beim Endanwender.
 
