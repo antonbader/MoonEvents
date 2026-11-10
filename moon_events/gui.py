@@ -13,6 +13,7 @@ from . import pdf
 from . import map
 from .calculation_logic import EphemCalculator
 
+
 class MondApp(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -35,7 +36,8 @@ class MondApp(tk.Tk):
                 config.read("info.conf")
                 defaults["version"] = config["INFO"].get("version", "1.0")
                 defaults["date"] = config["INFO"].get("date", "unknown")
-            except: pass
+            except Exception:
+                pass
         return defaults
 
     def create_widgets(self):
@@ -68,27 +70,29 @@ class MondApp(tk.Tk):
 
     # --- TAB KARTE ---
     def setup_map_tab(self):
-        # Control Frame
         ctrl_frame = ttk.Frame(self.tab_map)
         ctrl_frame.pack(fill='x', padx=5, pady=5)
 
         self.var_map_filter_visible = tk.BooleanVar(value=False)
-        self.chk_map_visible = ttk.Checkbutton(ctrl_frame, text="Nur beobachtbare anzeigen (Berechnung erforderlich)",
-                                               variable=self.var_map_filter_visible,
-                                               command=self.update_map_filter,
-                                               state='disabled')
+        self.chk_map_visible = ttk.Checkbutton(
+            ctrl_frame,
+            text="Nur beobachtbare anzeigen (Berechnung erforderlich)",
+            variable=self.var_map_filter_visible,
+            command=self.update_map_filter,
+            state='disabled'
+        )
         self.chk_map_visible.pack(side='left')
+
+        self.lbl_map_libration = ttk.Label(ctrl_frame, text="Libration: 0.0° N/S, 0.0° O/W (Standard)")
+        self.lbl_map_libration.pack(side='right', padx=10)
 
         self.map_widget = map.MoonMap(self.tab_map)
         self.map_widget.pack(fill='both', expand=True)
-        # Load initial selection
         self.update_map_selection()
 
-        # Bind tab change to refresh map if needed (optional, but good practice)
         self.notebook.bind('<<NotebookTabChanged>>', self.on_tab_changed)
 
     def on_tab_changed(self, event):
-        # Check if Map tab is selected
         selected_tab = event.widget.select()
         tab_text = event.widget.tab(selected_tab, "text")
         if tab_text == "Karte":
@@ -101,7 +105,6 @@ class MondApp(tk.Tk):
         sel_indices = self.app_data.get('selected_events_indices', [])
         selected_events = [self.events_db[i] for i in sel_indices if i < len(self.events_db)]
 
-        # Filter logic
         if self.var_map_filter_visible.get():
             selected_events = [e for e in selected_events if e['name'] in self.last_visible_event_names]
 
@@ -142,56 +145,92 @@ class MondApp(tk.Tk):
         self.loc_listbox.bind('<<ListboxSelect>>', self.on_location_select)
         detail_frame = ttk.LabelFrame(frame, text="Ort bearbeiten")
         detail_frame.pack(side='right', fill='both', expand=True, padx=5)
-        fields = [("Name:", "entry_name"), ("Breite:", "entry_lat"),
-                  ("Länge:", "entry_lon"), ("Höhe (m):", "entry_elev"),
-                  ("UTC Offset:", "entry_offset")]
+        fields = [
+            ("Name:", "entry_name"),
+            ("Breite:", "entry_lat"),
+            ("Länge:", "entry_lon"),
+            ("Höhe (m):", "entry_elev"),
+            ("UTC Offset (Winter):", "entry_offset"),
+        ]
         for i, (txt, var) in enumerate(fields):
-            ttk.Label(detail_frame, text=txt).grid(row=i, column=0, sticky='w', padx=5)
-            e = ttk.Entry(detail_frame); e.grid(row=i, column=1, sticky='ew', padx=5)
+            ttk.Label(detail_frame, text=txt).grid(row=i, column=0, sticky='w', padx=5, pady=2)
+            e = ttk.Entry(detail_frame)
+            e.grid(row=i, column=1, sticky='ew', padx=5, pady=2)
             setattr(self, var, e)
+
+        self.var_auto_dst = tk.BooleanVar(value=True)
+        chk_dst = ttk.Checkbutton(
+            detail_frame,
+            text="Sommerzeit automatisch berücksichtigen (MEZ/MESZ)",
+            variable=self.var_auto_dst
+        )
+        chk_dst.grid(row=5, column=0, columnspan=2, sticky='w', padx=5, pady=5)
+
         btn_frame = ttk.Frame(detail_frame)
-        btn_frame.grid(row=5, column=0, columnspan=2, pady=20)
+        btn_frame.grid(row=6, column=0, columnspan=2, pady=20)
         ttk.Button(btn_frame, text="Neu", command=self.add_location).pack(side='left', padx=2)
         ttk.Button(btn_frame, text="Löschen", command=self.delete_location).pack(side='left', padx=2)
         ttk.Button(btn_frame, text="Aktiv setzen", command=self.set_active_location).pack(side='left', padx=2)
         self.lbl_active_loc = ttk.Label(detail_frame, text="Aktiver Ort: -", font=('Arial', 10, 'bold'))
-        self.lbl_active_loc.grid(row=6, column=0, columnspan=2, pady=10)
+        self.lbl_active_loc.grid(row=7, column=0, columnspan=2, pady=10)
         self.refresh_loc_list()
 
     def refresh_loc_list(self):
         self.loc_listbox.delete(0, tk.END)
-        for loc in self.app_data['locations']: self.loc_listbox.insert(tk.END, loc['name'])
+        for loc in self.app_data['locations']:
+            self.loc_listbox.insert(tk.END, loc['name'])
         idx = self.app_data.get('selected_location_index', 0)
         if 0 <= idx < len(self.app_data['locations']):
             self.lbl_active_loc.config(text=f"Aktiver Ort: {self.app_data['locations'][idx]['name']}")
+
     def on_location_select(self, event):
         sel = self.loc_listbox.curselection()
-        if not sel: return
+        if not sel:
+            return
         loc = self.app_data['locations'][sel[0]]
-        self.entry_name.delete(0, tk.END); self.entry_name.insert(0, loc['name'])
-        self.entry_lat.delete(0, tk.END); self.entry_lat.insert(0, str(loc['lat']))
-        self.entry_lon.delete(0, tk.END); self.entry_lon.insert(0, str(loc['lon']))
-        self.entry_elev.delete(0, tk.END); self.entry_elev.insert(0, str(loc['elevation']))
-        self.entry_offset.delete(0, tk.END); self.entry_offset.insert(0, str(loc.get('timezone_offset', 1)))
+        self.entry_name.delete(0, tk.END)
+        self.entry_name.insert(0, loc['name'])
+        self.entry_lat.delete(0, tk.END)
+        self.entry_lat.insert(0, str(loc['lat']))
+        self.entry_lon.delete(0, tk.END)
+        self.entry_lon.insert(0, str(loc['lon']))
+        self.entry_elev.delete(0, tk.END)
+        self.entry_elev.insert(0, str(loc['elevation']))
+        self.entry_offset.delete(0, tk.END)
+        self.entry_offset.insert(0, str(loc.get('timezone_offset', 1)))
+        self.var_auto_dst.set(loc.get('auto_dst', True))
+
     def add_location(self):
         try:
-            new_loc = {"name": self.entry_name.get(), "lat": float(self.entry_lat.get()),
-                       "lon": float(self.entry_lon.get()), "elevation": float(self.entry_elev.get()),
-                       "timezone_offset": int(self.entry_offset.get())}
+            new_loc = {
+                "name": self.entry_name.get(),
+                "lat": float(self.entry_lat.get()),
+                "lon": float(self.entry_lon.get()),
+                "elevation": float(self.entry_elev.get()),
+                "timezone_offset": int(self.entry_offset.get()),
+                "auto_dst": bool(self.var_auto_dst.get()),
+            }
             self.app_data['locations'].append(new_loc)
             self.refresh_loc_list()
             storage.save_data(self.app_data)
-        except: messagebox.showerror("Fehler", "Eingabe prüfen.")
+        except Exception:
+            messagebox.showerror("Fehler", "Eingabe prüfen.")
+
     def delete_location(self):
         sel = self.loc_listbox.curselection()
-        if not sel or len(self.app_data['locations']) <= 1: return
+        if not sel or len(self.app_data['locations']) <= 1:
+            return
         del self.app_data['locations'][sel[0]]
         self.app_data['selected_location_index'] = 0
         self.refresh_loc_list()
         storage.save_data(self.app_data)
+
     def set_active_location(self):
         sel = self.loc_listbox.curselection()
-        if not sel: return
+        if not sel:
+            return
+        loc = self.app_data['locations'][sel[0]]
+        loc['auto_dst'] = bool(self.var_auto_dst.get())
         self.app_data['selected_location_index'] = sel[0]
         self.refresh_loc_list()
         storage.save_data(self.app_data)
@@ -219,22 +258,20 @@ class MondApp(tk.Tk):
         for i, event in enumerate(self.events_db):
             var = tk.BooleanVar(value=(i in sel_indices))
 
-            # Mondalter berechnen und Text anpassen
             moon_age = calculations.calculate_moon_age_approx(event.get('colong', 0))
-            display_text = f"{event['name']} (Tag {moon_age:.1f})"
+            display_text = f"{event['name']} (ca. Tag {moon_age:.1f})"
 
             chk = ttk.Checkbutton(scroll_frame, text=display_text, variable=var, command=self.save_event_selection)
 
-            # Grid-Layout: 2 Spalten
             row = i // 2
             col = i % 2
             chk.grid(row=row, column=col, sticky='w', padx=20, pady=2)
 
             self.event_vars.append(var)
+
     def save_event_selection(self):
         self.app_data['selected_events_indices'] = [i for i, var in enumerate(self.event_vars) if var.get()]
         storage.save_data(self.app_data)
-        # Update map if it exists
         if hasattr(self, 'map_widget'):
             self.update_map_selection()
 
@@ -254,22 +291,32 @@ class MondApp(tk.Tk):
         top_frame.pack(fill='x', padx=10, pady=10)
 
         ttk.Label(top_frame, text="Start:").pack(side='left')
-        self.date_entry_start = DateEntry(top_frame, width=12, background='darkblue',
-                                          foreground='white', borderwidth=2, date_pattern='dd.mm.yyyy')
+        self.date_entry_start = DateEntry(
+            top_frame, width=12, background='darkblue',
+            foreground='white', borderwidth=2, date_pattern='dd.mm.yyyy'
+        )
         self.date_entry_start.pack(side='left', padx=5)
-        ttk.Label(top_frame, text="Ende:").pack(side='left', padx=(10,0))
-        self.date_entry_end = DateEntry(top_frame, width=12, background='darkblue',
-                                        foreground='white', borderwidth=2, date_pattern='dd.mm.yyyy')
+        ttk.Label(top_frame, text="Ende:").pack(side='left', padx=(10, 0))
+        self.date_entry_end = DateEntry(
+            top_frame, width=12, background='darkblue',
+            foreground='white', borderwidth=2, date_pattern='dd.mm.yyyy'
+        )
         next_month = datetime.now() + timedelta(days=30)
         self.date_entry_end.set_date(next_month)
         self.date_entry_end.pack(side='left', padx=5)
-        chk_filter = ttk.Checkbutton(top_frame, text="Nur gut sichtbare anzeigen", variable=self.var_show_only_visible)
+        chk_filter = ttk.Checkbutton(
+            top_frame,
+            text="Nur gut sichtbare anzeigen",
+            variable=self.var_show_only_visible,
+            command=self.update_tree_display
+        )
         chk_filter.pack(side='left', padx=20)
         ttk.Button(top_frame, text="Berechnen", command=self.run_calculation).pack(side='left', padx=10)
         ttk.Button(top_frame, text="PDF Export", command=self.export_pdf).pack(side='right')
 
-        # Hinweis
-        ttk.Label(top_frame, text="Hinweis: Für Details Eintrag doppelt anklicken.").pack(side='bottom', anchor='w', padx=5, pady=(5,0))
+        ttk.Label(top_frame, text="Hinweis: Für Details (inkl. Libration & Sonnenhöhe) Eintrag doppelt anklicken.").pack(
+            side='bottom', anchor='w', padx=5, pady=(5, 0)
+        )
 
         tree_frame = ttk.Frame(self.tab_calc)
         tree_frame.pack(fill='both', expand=True, padx=10, pady=10)
@@ -308,7 +355,8 @@ class MondApp(tk.Tk):
 
     def run_calculation(self):
         loc_idx = self.app_data.get('selected_location_index', 0)
-        if loc_idx >= len(self.app_data['locations']): loc_idx = 0
+        if loc_idx >= len(self.app_data['locations']):
+            loc_idx = 0
         location = self.app_data['locations'][loc_idx]
         sel_indices = self.app_data.get('selected_events_indices', [])
         selected_events = [self.events_db[i] for i in sel_indices if i < len(self.events_db)]
@@ -320,11 +368,12 @@ class MondApp(tk.Tk):
         if d_end < d_start:
             messagebox.showwarning("Fehler", "Enddatum liegt vor Startdatum!")
             return
-        offset = location.get('timezone_offset', 1)
-        start_dt_local = datetime.combine(d_start, time(0,0,0))
-        start_dt_utc = start_dt_local - calculations.timedelta(hours=offset)
-        end_dt_local = datetime.combine(d_end, time(23,59,59))
-        end_dt_utc = end_dt_local - calculations.timedelta(hours=offset)
+
+        start_dt_local = datetime.combine(d_start, time(0, 0, 0))
+        start_dt_utc = calculations.local_to_utc(start_dt_local, location)
+        end_dt_local = datetime.combine(d_end, time(23, 59, 59))
+        end_dt_utc = calculations.local_to_utc(end_dt_local, location)
+
         self.config(cursor="watch")
         self.update()
         try:
@@ -334,10 +383,21 @@ class MondApp(tk.Tk):
             )
             self.current_results = raw_results
 
-            # Update Map Filter Data
             self.last_visible_event_names = {res['event']['name'] for res in raw_results if res['visible']}
             if hasattr(self, 'chk_map_visible'):
                 self.chk_map_visible.config(state='normal')
+
+            # Aktualisiere Libration für die Kartenprojektion anhand des ersten sichtbaren (oder ersten) Ergebnisses
+            ref_rows = [r for r in raw_results if r['visible']] or raw_results
+            if ref_rows and hasattr(self, 'map_widget'):
+                r0 = ref_rows[0]
+                lib_b = r0.get('lib_lat', 0.0)
+                lib_l = r0.get('lib_lon', 0.0)
+                self.map_widget.set_libration(lib_b, lib_l)
+                if hasattr(self, 'lbl_map_libration'):
+                    self.lbl_map_libration.config(
+                        text=f"Libration ({r0['peak_local'].strftime('%d.%m. %H:%M')}): Breiten-Lib. {lib_b:+.1f}°, Längen-Lib. {lib_l:+.1f}°"
+                    )
 
             self.update_tree_display()
         finally:
@@ -364,17 +424,17 @@ class MondApp(tk.Tk):
             short_desc = (full_desc[:60] + '..') if len(full_desc) > 60 else full_desc
 
             row_tag = 'good' if row['visible'] else 'bad'
-            self.tree.insert('', tk.END, values=(
-                row['event']['name'], s_str, p_str, tp_str, e_str, status_text, difficulty, short_desc
-            ), tags=(row_tag,))
+            self.tree.insert(
+                '', tk.END,
+                values=(row['event']['name'], s_str, p_str, tp_str, e_str, status_text, difficulty, short_desc),
+                tags=(row_tag,)
+            )
 
     def on_tree_double_click(self, event):
         item_id = self.tree.identify_row(event.y)
         if not item_id:
             return
 
-        # Determine index in filtered_results
-        # tree.get_children() returns all items in order
         children = self.tree.get_children()
         try:
             index = children.index(item_id)
@@ -387,9 +447,8 @@ class MondApp(tk.Tk):
     def show_detail_window(self, result):
         win = tk.Toplevel(self)
         win.title(f"Details: {result['event']['name']}")
-        win.geometry("500x600")
+        win.geometry("540x680")
 
-        # Main scrollable structure
         container = ttk.Frame(win)
         container.pack(fill='both', expand=True)
 
@@ -408,11 +467,9 @@ class MondApp(tk.Tk):
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
-        # Bind mousewheel (optional but good for UX)
         def _on_mousewheel(event):
-            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+            canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
-        # Bind mousewheel only when mouse is over the scrollable area
         def _bind_mousewheel(event):
             canvas.bind_all("<MouseWheel>", _on_mousewheel)
 
@@ -422,67 +479,71 @@ class MondApp(tk.Tk):
         canvas.bind("<Enter>", _bind_mousewheel)
         canvas.bind("<Leave>", _unbind_mousewheel)
 
-        # Content
         pad_x = 10
         pad_y = 5
 
-        # 1. Event Name (Bold)
         lbl_name = tk.Label(scrollable_frame, text=result['event']['name'], font=("Helvetica", 14, "bold"))
         lbl_name.pack(anchor='w', padx=pad_x, pady=(10, 5))
 
-        # 2. Visibility
         lbl_vis = tk.Label(scrollable_frame, text=f"Sichtbarkeit: {result['status_text']}", font=("Helvetica", 10))
         lbl_vis.pack(anchor='w', padx=pad_x, pady=pad_y)
 
-        # 3. Times
+        # Zeiten
         times_frame = ttk.LabelFrame(scrollable_frame, text="Zeiten (Lokal)")
         times_frame.pack(fill='x', padx=pad_x, pady=pad_y)
 
         times_data = [
             ("Start:", result['start_local'].strftime("%d.%m.%Y %H:%M")),
             ("Ende:", result['end_local'].strftime("%d.%m.%Y %H:%M")),
-            ("Optimum:", result['peak_local'].strftime("%d.%m.%Y %H:%M")),
-            ("Theor. Optimum:", result['theo_peak_local'].strftime("%d.%m.%Y %H:%M")),
+            ("Beobachtungs-Optimum:", result['peak_local'].strftime("%d.%m.%Y %H:%M")),
+            ("Theor. Optimum (2D):", result['theo_peak_local'].strftime("%d.%m.%Y %H:%M")),
         ]
 
         for i, (label, val) in enumerate(times_data):
             tk.Label(times_frame, text=label, font=("Helvetica", 9, "bold")).grid(row=i, column=0, sticky='w', padx=5, pady=2)
             tk.Label(times_frame, text=val).grid(row=i, column=1, sticky='w', padx=5, pady=2)
 
-        # 4. Details (Colong, Duration, Position, Phase)
-        details_frame = ttk.LabelFrame(scrollable_frame, text="Details")
+        # Astronomische Details (inkl. 2D-Sonnenstand und Libration)
+        details_frame = ttk.LabelFrame(scrollable_frame, text="Astronomische Parameter & Libration")
         details_frame.pack(fill='x', padx=pad_x, pady=pad_y)
 
-        # Colongitude
-        colong = result['event'].get('colong', 0)
-        tk.Label(details_frame, text="Colongitude:", font=("Helvetica", 9, "bold")).grid(row=0, column=0, sticky='w', padx=5, pady=2)
-        tk.Label(details_frame, text=f"{colong}°").grid(row=0, column=1, sticky='w', padx=5, pady=2)
-
-        # Duration
+        colong_ref = result['event'].get('colong', 0.0)
+        colong_act = result.get('colong_actual', colong_ref)
+        b0_deg = result.get('subsolar_lat', 0.0)
+        solar_alt = result.get('solar_alt', 0.0)
         dur = result['event'].get('duration_min', 0)
-        tk.Label(details_frame, text="Dauer:", font=("Helvetica", 9, "bold")).grid(row=1, column=0, sticky='w', padx=5, pady=2)
-        tk.Label(details_frame, text=f"{dur} min").grid(row=1, column=1, sticky='w', padx=5, pady=2)
+        lat = result['event'].get('lat', 0.0)
+        lon = result['event'].get('lon', 0.0)
+        lib_lat = result.get('lib_lat', 0.0)
+        lib_lon = result.get('lib_lon', 0.0)
+        center_dist = result.get('center_dist_deg', 0.0)
+        lib_status = result.get('lib_status', '-')
+        age_exact = result.get('moon_age_exact', calculations.calculate_moon_age_approx(colong_act))
+        phase_text = calculations.get_phase_description(age_exact)
 
-        # Position
-        lat = result['event'].get('lat', 0)
-        lon = result['event'].get('lon', 0)
-        tk.Label(details_frame, text="Position:", font=("Helvetica", 9, "bold")).grid(row=2, column=0, sticky='w', padx=5, pady=2)
-        tk.Label(details_frame, text=f"Lat {lat}°, Lon {lon}°").grid(row=2, column=1, sticky='w', padx=5, pady=2)
+        astro_rows = [
+            ("Colongitude (Aktuell / Ref.):", f"{colong_act:.2f}° (Ref. bei b0=0°: {colong_ref:.1f}°)"),
+            ("Subsolare Breite b0:", f"{b0_deg:+.2f}°"),
+            ("Lokale Sonnenhöhe am Krater:", f"{solar_alt:+.2f}°"),
+            ("Selenogr. Position:", f"Lat {lat:+.1f}°, Lon {lon:+.1f}°"),
+            ("Libration (Breite / Länge):", f"b = {lib_lat:+.2f}°, l = {lib_lon:+.2f}°"),
+            ("Randabstand & Bewertung:", f"{center_dist:.1f}° von Scheibenmitte ({lib_status})"),
+            ("Mondphase & wahres Alter:", f"{phase_text} (Tag {age_exact:.1f})"),
+            ("Ereignisfenster-Dauer:", f"{dur} min"),
+        ]
 
-        # Phase
-        age = calculations.calculate_moon_age_approx(colong)
-        phase_text = calculations.get_phase_description(age)
-        tk.Label(details_frame, text="Phase:", font=("Helvetica", 9, "bold")).grid(row=3, column=0, sticky='w', padx=5, pady=2)
-        tk.Label(details_frame, text=f"{phase_text} (Tag {age:.1f})").grid(row=3, column=1, sticky='w', padx=5, pady=2)
+        for i, (label, val) in enumerate(astro_rows):
+            tk.Label(details_frame, text=label, font=("Helvetica", 9, "bold")).grid(row=i, column=0, sticky='w', padx=5, pady=2)
+            tk.Label(details_frame, text=val).grid(row=i, column=1, sticky='w', padx=5, pady=2)
 
-        # 5. Description
+        # Beschreibung
         desc_frame = ttk.LabelFrame(scrollable_frame, text="Beschreibung")
         desc_frame.pack(fill='both', expand=True, padx=pad_x, pady=pad_y)
 
-        lbl_desc = tk.Label(desc_frame, text=result['event']['desc'], wraplength=450, justify="left")
+        lbl_desc = tk.Label(desc_frame, text=result['event']['desc'], wraplength=480, justify="left")
         lbl_desc.pack(anchor='w', padx=5, pady=5)
 
-        # 6. Difficulty & Tips
+        # Schwierigkeit & Tipps
         diff_frame = ttk.LabelFrame(scrollable_frame, text="Schwierigkeit & Tipps")
         diff_frame.pack(fill='both', expand=True, padx=pad_x, pady=pad_y)
 
@@ -493,7 +554,7 @@ class MondApp(tk.Tk):
         tk.Label(diff_frame, text=difficulty).pack(anchor='w', padx=15, pady=(0, 5))
 
         tk.Label(diff_frame, text="Beobachtungstipp:", font=("Helvetica", 9, "bold")).pack(anchor='w', padx=5, pady=(5, 2))
-        tk.Label(diff_frame, text=difficulty_tip, wraplength=450, justify="left").pack(anchor='w', padx=15, pady=(0, 5))
+        tk.Label(diff_frame, text=difficulty_tip, wraplength=480, justify="left").pack(anchor='w', padx=15, pady=(0, 5))
 
     def export_pdf(self):
         if not self.filtered_results:
@@ -506,8 +567,15 @@ class MondApp(tk.Tk):
             current_version = self.version_info.get('version', '1.0')
             d_start = self.date_entry_start.get_date()
             d_end = self.date_entry_end.get_date()
+            tz_label = calculations.get_timezone_label(loc)
             pdf.create_pdf(
-                filename, self.filtered_results, loc['name'], loc.get('timezone_offset', 1),
-                current_version, d_start, d_end
+                filename,
+                self.filtered_results,
+                loc['name'],
+                loc.get('timezone_offset', 1),
+                current_version,
+                d_start,
+                d_end,
+                tz_label=tz_label,
             )
             messagebox.showinfo("Erfolg", "PDF gespeichert.")
